@@ -2,7 +2,6 @@
 <html lang="{{ app()->getLocale() }}" dir="{{ in_array(app()->getLocale(), ['fa', 'ar']) ? 'rtl' : 'ltr' }}">
 <head>
     <script>
-        // تعیین حالت روز/شب پیش از رندر صفحه تا چشمک نزند
         (function () {
             try {
                 var saved = localStorage.getItem('site-theme');
@@ -35,7 +34,6 @@
     <style>
         * { font-family: 'Vazirmatn', sans-serif; }
 
-        /* ===== پالت رنگی حالت روز (پیش‌فرض) و شب ===== */
         :root {
             --bg-base: #f6f3ec;
             --bg-surface: #ffffff;
@@ -229,7 +227,6 @@
         </div>
     </div>
 </nav>
-<!-- محتوای اصلی -->
 @yield('main')
 
 <footer class="border-t border-[var(--border-base)] py-8 text-center text-[var(--text-faint)] text-xs w-full bg-[var(--bg-base)]">

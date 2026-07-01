@@ -1,3 +1,5 @@
+name: Auto Deploy
+
 on:
   push:
     branches:
@@ -15,15 +17,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # ۱. ابتدا دیتابیس و فایل‌های پایه را آپدیت می‌کنیم
+            # فقط همین یک دستور کافیست
             /usr/local/bin/dploy deploy main
-            
-            # ۲. ورود به پوشه ریلیز جدید که همین الان ساخته شد
-            cd /home/devprofile-the25years/htdocs/www.https://the25years.devprofile.ir/current
-            
-            # ۳. فورس کردن لینوکس به اتصال مستقیم فایل .env اصلی به پروژه
-            ln -sf ../../shared/.env .env
-            
-            # ۴. پاک کردن و ساخت مجدد کش با کانفیگ‌های واقعی
-            php8.2 artisan optimize:clear
-            php8.2 artisan config:cache

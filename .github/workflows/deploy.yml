@@ -1,15 +1,13 @@
-name: Auto Deploy
-
 on:
   push:
     branches:
-      - main  # اگر برنچ اصلی شما نام دیگری مثل master دارد، این کلمه را تغییر دهید
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH to Server and Deploy
+      - name: Execute Deploy Command via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -17,4 +15,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            dploy deploy main
+            # ۱. ابتدا دیتابیس و فایل‌های پایه را آپدیت می‌کنیم
+            /usr/local/bin/dploy deploy main
+            
+            # ۲. ورود به پوشه ریلیز جدید که همین الان ساخته شد
+            cd /home/devprofile-the25years/htdocs/www.https://the25years.devprofile.ir/current
+            
+            # ۳. فورس کردن لینوکس به اتصال مستقیم فایل .env اصلی به پروژه
+            ln -sf ../../shared/.env .env
+            
+            # ۴. پاک کردن و ساخت مجدد کش با کانفیگ‌های واقعی
+            php8.2 artisan optimize:clear
+            php8.2 artisan config:cache

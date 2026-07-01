@@ -1,0 +1,20 @@
+name: Auto Deploy
+
+on:
+  push:
+    branches:
+      - main  # اگر برنچ اصلی شما نام دیگری مثل master دارد، این کلمه را تغییر دهید
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH to Server and Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            dploy deploy main

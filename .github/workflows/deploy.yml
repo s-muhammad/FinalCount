@@ -17,5 +17,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # فقط همین یک دستور کافیست
+            # ۱. اجرای دستور دیپلوی خود کلودپنل
             /usr/local/bin/dploy deploy main
+            
+            # ۲. ورود به پوشه اصلی پروژه لاراول شما
+            cd /home/devprofile-the25years/htdocs/the25years.devprofile.ir/current
+            
+            # ۳. ساخت کلید لاراول (در صورتی که در فایل .env وجود نداشته باشه)
+            php artisan key:generate --force
+            
+            # ۴. پاک کردن و بهینه‌سازی کش کانفیگ‌ها
+            php artisan config:cache
+            php artisan route:cache

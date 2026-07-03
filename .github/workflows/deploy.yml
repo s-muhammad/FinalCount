@@ -17,15 +17,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # ۱. اجرای دستور دیپلوی خود کلودپنل
+            # ۱. اجرای دیپلوی پایه بدون دستور بهینه‌سازی داخلی
             /usr/local/bin/dploy deploy main
             
-            # ۲. ورود به پوشه اصلی پروژه لاراول شما
+            # ۲. رفتن به پوشه ریلیز جدید که سوئیچ شده است
             cd /home/devprofile-the25years/htdocs/the25years.devprofile.ir/current
-            ln -sf ../../shared/.env .env
-            # ۳. ساخت کلید لاراول (در صورتی که در فایل .env وجود نداشته باشه)
-            php artisan key:generate --force
             
-            # ۴. پاک کردن و بهینه‌سازی کش کانفیگ‌ها
-            php artisan config:cache
-            php artisan route:cache
+            # ۳. اتصال اجباری فایل .env واقعی
+            ln -sf ../../shared/.env .env
+            
+            # ۴. حالا که فایل تنظیمات هست، کش را با خیال راحت می‌سازیم
+            php8.2 artisan optimize:clear
+            php8.2 artisan optimize

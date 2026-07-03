@@ -17,15 +17,16 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # ۱. اجرای دیپلوی پایه بدون دستور بهینه‌سازی داخلی
+            # ۱. پاک کردن فیزیکی فایل کش کانفیگ قبلی سرور برای جلوگیری از تداخل
+            rm -f /home/devprofile-the25years/htdocs/the25years.devprofile.ir/current/bootstrap/cache/config.php
+            
+            # ۲. اجرای دیپلوی جدید
             /usr/local/bin/dploy deploy main
             
-            # ۲. رفتن به پوشه ریلیز جدید که سوئیچ شده است
+            # ۳. ورود به ریلیز جدید و چسباندن env
             cd /home/devprofile-the25years/htdocs/the25years.devprofile.ir/current
-            
-            # ۳. اتصال اجباری فایل .env واقعی
             ln -sf ../../shared/.env .env
             
-            # ۴. حالا که فایل تنظیمات هست، کش را با خیال راحت می‌سازیم
-            php8.2 artisan optimize:clear
+            # ۴. ساخت کش جدید
+            php8.2 artisan config:cache
             php8.2 artisan optimize

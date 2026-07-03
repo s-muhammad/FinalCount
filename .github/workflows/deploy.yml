@@ -17,10 +17,19 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # ۱. اجرای دیپلوی بدون مشکل
+            # ۱. اجرای دیپلوی پایه توسط dploy
             /usr/local/bin/dploy deploy main
             
-            # ۲. ورود به ریلیز جدید و پاک کردن کش برای اعمال نهایی
+            # ۲. رفتن به پوشه ریلیز جدید
             cd /home/devprofile-the25years/htdocs/the25years.devprofile.ir/current
+            
+            # ۳. اتصال اجباری فایل .env
+            ln -sf ../../shared/.env .env
+            
+            # ۴. نصب پکیج‌های جاوااسکریپت و بیلد کردن فایل‌های Vite
+            npm install
+            npm run build
+            
+            # ۵. پاک کردن و ساخت مجدد کش لاراول
             php8.2 artisan optimize:clear
-            php8.2 artisan optimize
+            php8.2 artisan config:cache

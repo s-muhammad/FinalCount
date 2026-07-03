@@ -22,7 +22,7 @@ jobs:
             
             # ۲. ورود به پوشه اصلی پروژه لاراول شما
             cd /home/devprofile-the25years/htdocs/the25years.devprofile.ir/current
-            
+            ln -sf ../../shared/.env .env
             # ۳. ساخت کلید لاراول (در صورتی که در فایل .env وجود نداشته باشه)
             php artisan key:generate --force
             

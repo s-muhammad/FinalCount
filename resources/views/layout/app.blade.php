@@ -126,12 +126,11 @@
 
             <div class="flex items-center gap-8 lg:gap-10">
                 <a href="/" class="flex items-center gap-2 group">
-                    <div class="w-8 h-8 rounded-full bg-yellow-600/20 border border-yellow-500/50 flex items-center justify-center
-                    group-hover:bg-yellow-500/30 transition">
-                        {{--                        @if(setting('site_logo'))--}}
-                        {{--                            <img src="{{asset(setting('site_logo'))}}" style="width: 45px" alt="">--}}
-                        {{--                        @endif--}}
-                        <span class="text-yellow-500 font-black text-sm">{{ __('logo_letter') }}</span>
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center transition">
+                        @if(setting('site_logo'))
+                            <img src="{{asset(setting('site_logo'))}}" style="width: 45px" alt="">
+                        @endif
+{{--                        <span class="text-yellow-500 font-black text-sm">{{ __('logo_letter') }}</span>--}}
                     </div>
                     <span class="text-white font-black tracking-widest text-lg group-hover:text-yellow-400 transition">{{ __('site_title') }}</span>
                 </a>

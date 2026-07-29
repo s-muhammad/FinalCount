@@ -23,7 +23,7 @@ Route::get('lang/{locale}', function ($locale) {
     return redirect()->back();
 })->name('change.language');
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/',[DashboardController::class, 'index']);
     Route::resource('user',UserController::class);
     Route::resource('blog', BlogController::class);

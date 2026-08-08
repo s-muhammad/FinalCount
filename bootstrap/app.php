@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SetLanguage::class,
         ]);
+        $middleware->trustProxies(at: '*');
+})
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

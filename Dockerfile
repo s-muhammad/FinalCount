@@ -12,7 +12,7 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 COPY . .
-RUN composer dump-autoload --optimize --no-dev
+RUN composer dump-autoload --optimize --no-dev --no-scripts
 
 # ---- Stage 3: final runtime image (php-fpm + nginx + supervisor bundled) ----
 FROM serversideup/php:8.2-fpm-nginx AS production

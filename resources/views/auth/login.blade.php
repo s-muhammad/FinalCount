@@ -9,13 +9,13 @@
             @csrf
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ایمیل</label>
-                <input type="email" name="email" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white dark:placeholder-gray-400 outline-none transition-all" placeholder="09xxxxxxxxx">
+                <input type="email" name="email" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white dark:placeholder-gray-400 outline-none transition-all">
             </div>
             <div>
                 <div class="flex justify-between items-center mb-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">رمز عبور</label>
                 </div>
-                <input type="password" name="password" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white dark:placeholder-gray-400 outline-none transition-all" placeholder="••••••••">
+                <input type="password" name="password" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white dark:placeholder-gray-400 outline-none transition-all">
             </div>
             <div class="flex items-center justify-between mt-2 mb-4">
                 <label class="flex items-center cursor-pointer">

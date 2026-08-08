@@ -1,35 +1,41 @@
-name: Auto Deploy
+name: Build and Deploy
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
-      - name: Execute Deploy Command via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            # ۱. اجرای دیپلوی پایه توسط dploy
-            /usr/local/bin/dploy deploy main
-            
-            # ۲. رفتن به پوشه ریلیز جدید
-            cd /home/devprofile-the25years/htdocs/the25years.devprofile.ir/current
-            
-            # ۳. اتصال اجباری فایل .env
-            ln -sf ../../shared/.env .env
-            
-            # ۴. نصب پکیج‌های جاوااسکریپت و بیلد کردن فایل‌های Vite
-            npm install
-            npm run build
-            
-            # ۵. پاک کردن و ساخت مجدد کش لاراول
-            php8.2 artisan optimize:clear
-            php8.2 artisan config:cache
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/s-muhammad/finalcount:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Trigger Coolify deploy
+        run: |
+          curl -fsSL -X GET "${{ secrets.COOLIFY_WEBHOOK_URL }}" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_WEBHOOK_TOKEN }}"

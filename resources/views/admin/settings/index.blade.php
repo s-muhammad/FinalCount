@@ -37,7 +37,7 @@
         <div class="flex items-center mb-8 justify-between border-b pb-4">
             <h2 class="text-3xl font-extrabold text-gray-800">
                 <i class="fas fa-sliders-h text-blue-600 ml-3"></i>
-                مدیریت تنظیمات سایت
+                 تنظیمات سایت
             </h2>
         </div>
 

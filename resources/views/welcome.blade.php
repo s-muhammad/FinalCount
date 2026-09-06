@@ -1,203 +1,288 @@
-@extends('layout.app')
-@section('main')
-    <header class="relative w-full h-[calc(100vh-4.5rem)] flex items-center justify-center overflow-hidden bg-[#0c0c0e]">
-        <img
-            src="{{asset(setting('site_image'))}}"
-            alt="{{ __('horizon_of_power_and_hope') }}"
-            class="absolute inset-0 w-full h-full object-cover opacity-40 z-0"
-        >
-        <div class="absolute inset-0 bg-black/10 z-10"></div>
-        <div class="absolute inset-0 radial-gradient z-10"></div>
-        <div class="relative z-20 text-center px-4 max-w-6xl mx-auto w-full h-full flex flex-col justify-between py-4 md:py-6">
-            <div class="pt-2">
-                <div class="inline-flex items-center gap-3 bg-black/50 backdrop-blur-sm border border-yellow-600/50 px-4 py-1.5 rounded-full">
-                    <span class="text-gray-300 text-xs">{{ __('historic_speech') }}</span>
-                    <span class="w-1 h-1 bg-yellow-500 rounded-full"></span>
-                    <span class="text-yellow-400 text-xs font-mono tracking-widest" dir="{{ app()->getLocale() == 'en' ? 'ltr' : 'rtl' }}">{{ __('speech_date') }}</span>
+@extends('public.layout')
+
+@section('title', __('messages.home'))
+
+@section('content')
+<!-- Hero Section -->
+<section class="mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Feature -->
+        <div class="lg:col-span-2 relative rounded-2xl overflow-hidden h-80 bg-gray-800">
+            @if($featuredNews && $featuredNews->image)
+                <img src="{{ Storage::url($featuredNews->image) }}" alt="{{ localize($featuredNews, 'title') }}" class="w-full h-full object-cover opacity-80">
+            @else
+                <img src="https://placehold.co/800x400/1a1a1a/white?text=speech" alt="" class="w-full h-full object-cover opacity-80">
+            @endif
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+            <div class="absolute bottom-0 right-0 p-6 text-white">
+                <h1 class="text-2xl font-bold mb-2">{{ localize($featuredNews, 'title') }}</h1>
+                <p class="text-sm text-gray-300 mb-4">{{ localize($featuredNews, 'summary') }}</p>
+                @if($featuredNews)
+                    <a href="{{ route('public.news.show', $featuredNews) }}" class="bg-white/20 hover:bg-white/30 backdrop-blur px-4 py-2 rounded-lg text-sm transition inline-block">
+                        {{ __('messages.view_full_statement') }}
+                    </a>
+                @endif
+            </div>
+            <div class="absolute top-4 right-4">
+                <div class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold">
+                    {{ __('messages.new_statement') }}
                 </div>
             </div>
-            <div class="flex-1 flex flex-col justify-center items-center my-auto space-y-4 md:space-y-6">
-                <div class="space-y-1 md:space-y-2">
-                    <div class="text-2xl md:text-4xl lg:text-5xl font-black leading-tight">
-                        <span class="text-white">{{ __('title_part_1') }}</span>
-                        {{--                    <br class="hidden md:block">--}}
-                        <span class="text-white">{{ __('title_part_2') }}</span>
-                    </div>
-                    <p class="text-gray-400 text-sm md:text-base lg:text-lg max-w-2xl mx-auto font-light tracking-wide px-2">
-                        {{ __('promise_quote') }}
-                    </p>
-                    <div class="flex justify-center mt-1">
-                        <div class="w-16 h-0.5 bg-gradient-to-l from-yellow-500 to-transparent"></div>
-                        <div class="w-16 h-0.5 bg-gradient-to-r from-yellow-500 to-transparent"></div>
-                    </div>
-                </div>
+        </div>
 
-                <div class="bg-[#0b0c0e]/10 strategic-timer rounded-2xl p-4 lg:p-6 inline-block mx-auto shadow-2xl w-full max-w-4xl">
-                    <div class="flex items-center justify-center gap-2 mb-3">
-                        <span class="text-yellow-500 text-[10px] md:text-xs font-mono tracking-[0.2em] border border-yellow-500/30 px-3 py-0.5">{{ __('time_remaining') }}</span>
-                    </div>
-
-                    <!-- تایمر -->
-                    <div id="timer" class="flex flex-wrap items-center justify-center gap-1 md:gap-3" dir="ltr">
-                        <!-- سال -->
-                        <div class="flex flex-col items-center w-14 md:w-20 lg:w-24">
-                            <div class="bg-black/50 border border-yellow-600/50 rounded-lg p-1 w-full">
-                                <span id="years" class="text-2xl md:text-4xl lg:text-5xl font-mono font-bold text-yellow-400 block text-center">00</span>
-                            </div>
-                            <span class="text-[9px] md:text-xs mt-1 text-yellow-600 font-medium">{{ __('year') }}</span>
-                        </div>
-                        <span class="text-lg md:text-2xl text-yellow-700 self-start mt-1">:</span>
-
-                        <!-- ماه -->
-                        <div class="flex flex-col items-center w-14 md:w-20 lg:w-24">
-                            <div class="bg-black/50 border border-yellow-600/50 rounded-lg p-1 w-full">
-                                <span id="months" class="text-2xl md:text-4xl lg:text-5xl font-mono font-bold text-yellow-400 block text-center">00</span>
-                            </div>
-                            <span class="text-[9px] md:text-xs mt-1 text-yellow-600 font-medium">{{ __('month') }}</span>
-                        </div>
-                        <span class="text-lg md:text-2xl text-yellow-700 self-start mt-1">:</span>
-
-                        <!-- روز -->
-                        <div class="flex flex-col items-center w-14 md:w-20 lg:w-24">
-                            <div class="bg-black/50 border border-yellow-600/50 rounded-lg p-1 w-full">
-                                <span id="days" class="text-2xl md:text-4xl lg:text-5xl font-mono font-bold text-yellow-400 block text-center">00</span>
-                            </div>
-                            <span class="text-[9px] md:text-xs mt-1 text-yellow-600 font-medium">{{ __('day') }}</span>
-                        </div>
-                        <span class="text-lg md:text-2xl text-yellow-700 self-start mt-1">:</span>
-
-                        <!-- ساعت -->
-                        <div class="flex flex-col items-center w-14 md:w-20 lg:w-24">
-                            <div class="bg-black/50 border border-yellow-600/50 rounded-lg p-1 w-full">
-                                <span id="hours" class="text-2xl md:text-4xl lg:text-5xl font-mono font-bold text-yellow-400 block text-center">00</span>
-                            </div>
-                            <span class="text-[9px] md:text-xs mt-1 text-yellow-600 font-medium">{{ __('hour') }}</span>
-                        </div>
-                        <span class="text-lg md:text-2xl text-yellow-700 self-start mt-1">:</span>
-
-                        <!-- دقیقه -->
-                        <div class="flex flex-col items-center w-14 md:w-20 lg:w-24">
-                            <div class="bg-black/50 border border-yellow-600/50 rounded-lg p-1 w-full">
-                                <span id="minutes" class="text-2xl md:text-4xl lg:text-5xl font-mono font-bold text-yellow-400 block text-center">00</span>
-                            </div>
-                            <span class="text-[9px] md:text-xs mt-1 text-yellow-600 font-medium">{{ __('minute') }}</span>
-                        </div>
-                        <span class="text-lg md:text-2xl text-yellow-700 self-start mt-1">:</span>
-
-                        <!-- ثانیه -->
-                        <div class="flex flex-col items-center w-14 md:w-20 lg:w-24">
-                            <div class="bg-black/50 border border-yellow-600/50 rounded-lg p-1 w-full">
-                                <span id="seconds" class="text-2xl md:text-4xl lg:text-5xl font-mono font-bold text-yellow-400 block text-center">00</span>
-                            </div>
-                            <span class="text-[9px] md:text-xs mt-1 text-yellow-600 font-medium">{{ __('second') }}</span>
-                        </div>
-                    </div>
-
-                    <!-- تاریخ هدف -->
-                    <div class="mt-4 text-gray-400 font-mono text-[10px] md:text-xs border-t border-yellow-600/20 pt-2">
-                        <span class="text-yellow-500">{{ __('target_date') }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- بخش پایینی: دکمه اسکرول -->
-            <div class="pb-2">
-                <a href="#news-section" class="inline-flex items-center gap-2 text-yellow-500/70 hover:text-yellow-400 transition border border-yellow-600/30 rounded-full px-3 py-1 backdrop-blur-sm">
-                    <span class="text-[10px] tracking-widest">{{ __('news_and_analysis') }}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
+        <!-- Side Features -->
+        <div class="space-y-4">
+            @if($latestMessages->count())
+                <a href="{{ route('public.messages.show', $latestMessages->first()) }}" class="block bg-gradient-to-br from-primary to-primary-light rounded-2xl p-6 text-white h-[152px] flex flex-col justify-center">
+                    <h3 class="text-lg font-bold mb-2">{{ localize($latestMessages->first(), 'title') }}</h3>
+                    <p class="text-sm text-white/80 line-clamp-2">{{ localize($latestMessages->first(), 'summary') }}</p>
                 </a>
+            @endif
+            @if($latestNews->count() > 1)
+                <a href="{{ route('public.news.show', $latestNews->skip(1)->first()) }}" class="block bg-white rounded-2xl p-4 h-[152px]">
+                    <p class="text-gray-700 text-sm line-clamp-3">
+                        {{ localize($latestNews->skip(1)->first(), 'summary') }}
+                    </p>
+                    <div class="mt-4 flex items-center gap-2">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                            <span class="text-white text-xs">ن</span>
+                        </div>
+                        <span class="text-xs text-gray-500">{{ $latestNews->skip(1)->first()?->published_at?->diffForHumans() }}</span>
+                    </div>
+                </a>
+            @endif
+        </div>
+    </div>
+</section>
+
+<!-- Countdown Section -->
+<section class="mb-6" x-data="{
+    countdown: { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 },
+    init() {
+        const target = new Date('2040-09-09T00:00:00+03:30').getTime();
+        const update = () => {
+            const now = Date.now();
+            const diff = target - now;
+            if (diff <= 0) return;
+            const totalSeconds = Math.floor(diff / 1000);
+            const totalMinutes = Math.floor(totalSeconds / 60);
+            const totalHours = Math.floor(totalMinutes / 60);
+            const nowDate = new Date();
+            const targetDate = new Date('2040-09-09');
+            this.countdown.years = targetDate.getFullYear() - nowDate.getFullYear();
+            this.countdown.months = targetDate.getMonth() - nowDate.getMonth();
+            this.countdown.days = targetDate.getDate() - nowDate.getDate();
+            if (this.countdown.days < 0) {
+                this.countdown.months--;
+                const prevMonth = new Date(nowDate.getFullYear(), nowDate.getMonth(), 0);
+                this.countdown.days += prevMonth.getDate();
+            }
+            if (this.countdown.months < 0) {
+                this.countdown.years--;
+                this.countdown.months += 12;
+            }
+            this.countdown.hours = totalHours % 24;
+            this.countdown.minutes = totalMinutes % 60;
+            this.countdown.seconds = totalSeconds % 60;
+        };
+        update();
+        setInterval(update, 1000);
+    }
+}" x-init="init()">
+    <div class="bg-primary rounded-2xl py-8 md:py-10">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <div class="inline-block px-5 py-2 border border-white/30 rounded-full text-white text-sm mb-6">
+                {{ __('messages.countdown_announcement') }}
+            </div>
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4">
+                {{ __('messages.countdown_title') }}
+            </h2>
+            <p class="text-white/80 text-sm md:text-base mb-8 max-w-2xl mx-auto">
+                {{ __('messages.countdown_description') }}
+            </p>
+            <div class="flex justify-center gap-2 md:gap-3 mb-6" style="direction: ltr;">
+                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                    <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.years).padStart(2, '0')"></div>
+                    <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.years') }}</div>
+                </div>
+                <div class="flex items-center text-white/40 text-lg md:text-xl font-bold">:</div>
+                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                    <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.months).padStart(2, '0')"></div>
+                    <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.months') }}</div>
+                </div>
+                <div class="flex items-center text-white/40 text-lg md:text-xl font-bold">:</div>
+                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                    <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.days).padStart(2, '0')"></div>
+                    <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.days') }}</div>
+                </div>
+                <div class="flex items-center text-white/40 text-lg md:text-xl font-bold">:</div>
+                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                    <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.hours).padStart(2, '0')"></div>
+                    <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.hours') }}</div>
+                </div>
+                <div class="flex items-center text-white/40 text-lg md:text-xl font-bold">:</div>
+                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                    <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.minutes).padStart(2, '0')"></div>
+                    <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.minutes') }}</div>
+                </div>
+                <div class="flex items-center text-white/40 text-lg md:text-xl font-bold">:</div>
+                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                    <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.seconds).padStart(2, '0')"></div>
+                    <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.seconds') }}</div>
+                </div>
+            </div>
+            <p class="text-white/60 text-xs md:text-sm">
+                {{ __('messages.target_date') }}
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- News & Messages -->
+@if(($activeModules['news'] ?? true) || ($activeModules['messages'] ?? true))
+<section class="mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Latest News -->
+        @if($activeModules['news'] ?? true)
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-primary">{{ __('messages.latest_news') }}</h2>
+                <a href="{{ route('public.news') }}" class="text-sm text-primary hover:underline">{{ __('messages.view_all') }}</a>
+            </div>
+            <div class="space-y-4">
+                @forelse($latestNews as $item)
+                    <a href="{{ route('public.news.show', $item) }}" class="block border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xs text-gray-400 mt-1">{{ $item->published_at?->format('Y/m/d') ?? $item->created_at->format('Y/m/d') }}</span>
+                            <p class="text-sm text-gray-700 hover:text-primary">{{ localize($item, 'title') }}</p>
+                        </div>
+                    </a>
+                @empty
+                    <p class="text-gray-500 text-sm text-center py-4">{{ __('messages.no_news') }}</p>
+                @endforelse
             </div>
         </div>
-    </header>
-    <section id="news-section" class="py-20 px-4 max-w-7xl mx-auto scroll-mt-16">
+        @endif
 
-        <div class="text-center mb-16">
-            <span class="text-[var(--accent-deep)] font-mono text-sm tracking-widest border border-yellow-600/30 px-4 py-1">{{ __('analysis_and_tracking') }}</span>
-            <h2 class="text-4xl md:text-5xl font-black mt-6 text-[var(--text-primary)]">{{ __('on_the_path_to_fulfillment') }}</h2>
-            <p class="text-[var(--text-muted)] max-w-2xl mx-auto mt-4">{{ __('latest_news_subtitle') }}</p>
-        </div>
-
-        <div class="space-y-20">
-            @foreach($categories->where('is_on_homepage', true) as $category)
-                <div class="category-row">
-
-                    <div class="flex items-end justify-between border-b border-[var(--border-strong)] pb-4 mb-8">
-                        <div class="flex items-center gap-3">
-                            <span class="w-1.5 h-8 bg-yellow-600 rounded-sm"></span>
-                            <div>
-                                <h3 class="text-2xl md:text-3xl font-bold text-[var(--text-primary)]">{{ $category->name }}</h3>
-                            </div>
+        <!-- Messages -->
+        @if($activeModules['messages'] ?? true)
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-primary">{{ __('messages.messages') }}</h2>
+                <a href="{{ route('public.messages') }}" class="text-sm text-primary hover:underline">{{ __('messages.view_all') }}</a>
+            </div>
+            <div class="space-y-4">
+                @forelse($latestMessages as $item)
+                    <a href="{{ route('public.messages.show', $item) }}" class="block border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                        <div class="flex items-start gap-3">
+                            <span class="text-xs text-gray-400 mt-1">{{ $item->published_at?->format('Y/m/d') ?? $item->created_at->format('Y/m/d') }}</span>
+                            <p class="text-sm text-gray-700 hover:text-primary">{{ localize($item, 'title') }}</p>
                         </div>
+                    </a>
+                @empty
+                    <p class="text-gray-500 text-sm text-center py-4">{{ __('messages.no_messages') }}</p>
+                @endforelse
+            </div>
+        </div>
+        @endif
+    </div>
+</section>
+@endif
 
-                        <a href="{{ route('category.list',$category->id) }}" class="group flex items-center gap-2 text-sm text-[var(--accent-deep)] hover:text-yellow-400 transition-colors">
-                            <span class="hidden md:inline">{{ __('view_all') }}</span>
-                            {{--                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"--}}
-                            {{--                                 class="w-4 h-4 group-hover:{{ app()->getLocale() == 'en' ? 'translate-x-1' : '-translate-x-1' }} transition-transform">--}}
-                            {{--                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />--}}
-                            {{--                            </svg>--}}
-                        </a>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        @foreach($category->blogs()->latest()->take(3)->get() as $post)
-                            <div class="group bg-[var(--bg-surface)] border border-[var(--border-strong)] hover:border-yellow-600/50 rounded-2xl overflow-hidden
-                        transition-all duration-500 shadow-xl flex flex-col h-full">
-                                <div class="h-48 overflow-hidden relative shrink-0">
-                                    <img src="{{ asset($post->image) }}" alt="{{ __('news_title_alt') }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 opacity-70 group-hover:opacity-100">
-                                    <div class="absolute top-3 right-3 flex flex-wrap gap-2">
-                                        @php
-                                            $currentLocale = app()->getLocale();
-                                            $localeTags = $post->tags->where('type', $currentLocale);
-                                            if($localeTags->isEmpty()) {
-                                                $localeTags = $post->tags->where('type', 'fa');
-                                            }
-                                        @endphp
-
-                                        @foreach($localeTags as $tag)
-                                            <span class="bg-black/70 backdrop-blur-md border border-yellow-600/50 text-white text-[10px] font-bold px-3 py-1.5 rounded-full">
-                                            {{ $tag->getTranslation('name', $tag->type) }}
-                                        </span>
-                                        @endforeach
-                                    </div>
-                                </div>
-
-                                <div class="p-6 flex flex-col flex-grow">
-                                    <div class="flex items-center text-yellow-500/80 text-xs mb-3 font-mono">
-                                        <i class="far fa-clock ml-1"></i>
-                                        {{ $post->created_at->diffForHumans() }}
-                                    </div>
-
-                                    <h3 class="text-xl font-bold mb-3 text-[var(--text-primary)] group-hover:text-yellow-400 transition line-clamp-2">
-                                        {{ $post->title }}
-                                    </h3>
-
-                                    <p class="text-[var(--text-muted)] text-sm leading-relaxed mb-4 line-clamp-3 flex-grow">
-                                        {{ $post->summary }}
-                                    </p>
-
-                                    <div class="mt-auto pt-4 border-t border-[var(--border-base)]">
-                                        <a href="{{ route('single',$post->id) }}" class="text-[var(--accent-deep)] text-sm font-medium hover:text-yellow-400 inline-flex items-center transition-colors">
-                                            {{ __('read_more') }}
-                                            {{--                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-1 rtl:-scale-x-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">--}}
-                                            {{--                                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />--}}
-                                            {{--                                            </svg>--}}
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
+<!-- Media Section -->
+@if($activeModules['media'] ?? true)
+<section class="mb-6">
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
                 </div>
-            @endforeach
+                <h2 class="text-lg font-bold text-primary">{{ __('messages.featured_media') }}</h2>
+            </div>
+            <a href="{{ route('public.media') }}" class="text-sm text-primary hover:underline">{{ __('messages.view_all') }}</a>
         </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            @forelse($latestMedia as $item)
+                <a href="{{ route('public.media.show', $item) }}" class="relative rounded-xl overflow-hidden group cursor-pointer aspect-[3/4]">
+                    @if($item->thumbnail)
+                        <img src="{{ Storage::url($item->thumbnail) }}" alt="{{ localize($item, 'title') }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    @else
+                        <div class="w-full h-full bg-primary flex items-center justify-center">
+                            <svg class="w-12 h-12 text-white/50" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                    @endif
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div class="absolute bottom-0 right-0 p-4 text-white">
+                        <h3 class="font-bold text-sm">{{ localize($item, 'title') }}</h3>
+                    </div>
+                </a>
+            @empty
+                <p class="text-gray-500 text-sm text-center py-4 col-span-4">{{ __('messages.no_media') }}</p>
+            @endforelse
+        </div>
+    </div>
+</section>
+@endif
 
-        <div class="mt-24 text-center border-t border-[var(--border-strong)] pt-12">
-            <blockquote class="text-2xl md:text-3xl text-[var(--text-secondary)] italic max-w-4xl mx-auto font-light leading-snug">
-                {{ __('leader_quote') }}
-                <footer class="text-yellow-500 text-lg mt-6 not-italic font-medium">{{ __('quote_author') }}</footer>
-            </blockquote>
+<!-- Quote & Gallery Section -->
+@if(($activeModules['quotes'] ?? true) || ($activeModules['gallery'] ?? true))
+<section class="mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Quotes -->
+        @if($activeModules['quotes'] ?? true)
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <div class="flex items-center gap-2 mb-6">
+                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                </div>
+                <h2 class="text-lg font-bold text-primary">{{ __('messages.quotes') }}</h2>
+            </div>
+            <div class="space-y-4">
+                @forelse($quotes as $quote)
+                    <div class="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                        <p class="text-gray-700 text-sm italic mb-2">"{{ localize($quote, 'body') }}"</p>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span>{{ localize($quote, 'source') }}</span>
+                            <span>{{ $quote->date }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-gray-500 text-sm text-center py-4">{{ __('messages.no_quotes') }}</p>
+                @endforelse
+            </div>
         </div>
-    </section>
+        @endif
+
+        <!-- Gallery -->
+        @if($activeModules['gallery'] ?? true)
+        <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h2 class="text-lg font-bold text-primary">{{ __('messages.gallery') }}</h2>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                @forelse($gallery as $item)
+                    <div class="relative rounded-xl overflow-hidden group cursor-pointer aspect-video">
+                        <img src="{{ Storage::url($item->image) }}" alt="{{ $item->title }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                @empty
+                    <p class="text-gray-500 text-sm text-center py-4 col-span-4">{{ __('messages.no_gallery') }}</p>
+                @endforelse
+            </div>
+        </div>
+        @endif
+    </div>
+</section>
+@endif
 @endsection

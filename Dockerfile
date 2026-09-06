@@ -15,7 +15,7 @@ COPY . .
 RUN composer dump-autoload --optimize --no-dev --no-scripts
 
 # ---- Stage 3: final runtime image (php-fpm + nginx + supervisor bundled) ----
-FROM serversideup/php:8.3-fpm-nginx AS production
+FROM serversideup/php:8.4-fpm-nginx AS production
 USER root
 
 WORKDIR /var/www/html

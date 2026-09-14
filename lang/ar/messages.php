@@ -2,8 +2,8 @@
 
 return [
     // Header
-    'site_name' => 'نگاران الإعلامية',
-    'site_url' => 'nangaran.ir',
+    'site_name' => 'الْعَدُّ النِّهَائِيُّ',
+    'site_url' => 'finalcount.ir',
     'search_placeholder' => 'بحث...',
     
     // Navigation

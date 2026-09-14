@@ -56,10 +56,16 @@
 </section>
 
 <!-- Countdown Section -->
+@php
+    $countdownTargetDate = \App\Models\Setting::getValue('countdown_target_date', '2040-09-09');
+    $countdownBgColor = \App\Models\Setting::getValue('countdown_bg_color', '#1a4d2e');
+    $countdownBgImage = \App\Models\Setting::getValue('countdown_bg_image', '');
+@endphp
 <section class="mb-6" x-data="{
     countdown: { years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0 },
     init() {
-        const target = new Date('2040-09-09T00:00:00+03:30').getTime();
+        const target = new Date('{{ $countdownTargetDate }}T00:00:00+03:30').getTime();
+        const targetDate = new Date('{{ $countdownTargetDate }}');
         const update = () => {
             const now = Date.now();
             const diff = target - now;
@@ -68,7 +74,6 @@
             const totalMinutes = Math.floor(totalSeconds / 60);
             const totalHours = Math.floor(totalMinutes / 60);
             const nowDate = new Date();
-            const targetDate = new Date('2040-09-09');
             this.countdown.years = targetDate.getFullYear() - nowDate.getFullYear();
             this.countdown.months = targetDate.getMonth() - nowDate.getMonth();
             this.countdown.days = targetDate.getDate() - nowDate.getDate();
@@ -89,9 +94,11 @@
         setInterval(update, 1000);
     }
 }" x-init="init()">
-    <div class="bg-primary rounded-2xl py-8 md:py-10">
-        <div class="max-w-4xl mx-auto px-4 text-center">
-            <div class="inline-block px-5 py-2 border border-white/30 rounded-full text-white text-sm mb-6">
+    <div class="rounded-2xl py-8 md:py-10 relative overflow-hidden bg-cover bg-center"
+         @if($countdownBgImage) style="background-image: url('{{ Storage::url($countdownBgImage) }}');" @else style="background-color: {{ $countdownBgColor }};" @endif>
+        <div class="absolute inset-0 bg-black/30"></div>
+        <div class="relative z-10 max-w-4xl mx-auto px-4 text-center">
+            <div class="inline-block px-5 py-2 border border-white/30 rounded-full text-white text-sm mb-6 backdrop-blur-sm bg-white/10">
                 {{ __('messages.countdown_announcement') }}
             </div>
             <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4">
@@ -101,32 +108,32 @@
                 {{ __('messages.countdown_description') }}
             </p>
             <div class="flex justify-center gap-2 md:gap-3 mb-6" style="direction: ltr;">
-                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
                     <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.years).padStart(2, '0')"></div>
                     <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.years') }}</div>
                 </div>
                 <div class="flex items-center text-white/40 text-lg md:text-xl font-bold">:</div>
-                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
                     <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.months).padStart(2, '0')"></div>
                     <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.months') }}</div>
                 </div>
                 <div class="flex items-center text-white/40 text-lg md:text-xl font-bold">:</div>
-                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
                     <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.days).padStart(2, '0')"></div>
                     <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.days') }}</div>
                 </div>
                 <div class="flex items-center text-white/40 text-lg md:text-xl font-bold">:</div>
-                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
                     <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.hours).padStart(2, '0')"></div>
                     <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.hours') }}</div>
                 </div>
                 <div class="flex items-center text-white/40 text-lg md:text-xl font-bold">:</div>
-                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
                     <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.minutes).padStart(2, '0')"></div>
                     <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.minutes') }}</div>
                 </div>
                 <div class="flex items-center text-white/40 text-lg md:text-xl font-bold">:</div>
-                <div class="bg-white/10 border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
+                <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
                     <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.seconds).padStart(2, '0')"></div>
                     <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.seconds') }}</div>
                 </div>

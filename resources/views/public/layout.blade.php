@@ -13,6 +13,52 @@
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* استایل محتوای خبر و پیام */
+        .article-body {
+            font-family: 'Vazirmatn', sans-serif;
+            font-size: 17px;
+            line-height: 2.2;
+            color: #374151;
+            text-align: justify;
+        }
+        .article-body p {
+            margin-bottom: 1.5rem;
+        }
+        .article-body h2,
+        .article-body h3 {
+            font-weight: 700;
+            color: #1f2937;
+            margin: 1.75rem 0 0.75rem;
+        }
+        .article-body h2 { font-size: 1.4rem; }
+        .article-body h3 { font-size: 1.2rem; }
+        .article-body ul,
+        .article-body ol {
+            margin: 1rem 0 1.5rem;
+            padding-right: 1.5rem;
+        }
+        .article-body ul { list-style: disc; }
+        .article-body ol { list-style: decimal; }
+        .article-body a {
+            color: #1a4d2e;
+            text-decoration: underline;
+        }
+        .article-body blockquote {
+            border-right: 4px solid #1a4d2e;
+            background: #f0f7f2;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: #4b5563;
+        }
+        .article-body img {
+            border-radius: 12px;
+            margin: 1.5rem auto;
+            max-width: 100%;
+        }
+        .article-body strong { font-weight: 700; }
     </style>
 </head>
 <body class="bg-gray-100" x-data="{ mobileMenu: false }">
@@ -22,8 +68,13 @@
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
                 <a href="{{ route('home') }}" class="flex items-center gap-2">
-                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                        <span class="text-white font-bold text-lg">ن</span>
+                    @php $siteLogo = \App\Models\Setting::getValue('site_logo'); @endphp
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden">
+                        @if($siteLogo)
+                            <img src="{{ Storage::url($siteLogo) }}" alt="{{ __('messages.site_name') }}" class="w-full h-full object-cover">
+                        @else
+                            <span class="text-white font-bold text-lg">ن</span>
+                        @endif
                     </div>
                     <div class="text-right hidden sm:block">
                         <div class="text-primary font-bold text-sm">{{ __('messages.site_name') }}</div>
@@ -144,8 +195,13 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div>
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                            <span class="text-white font-bold text-lg">ن</span>
+                        @php $footerLogo = \App\Models\Setting::getValue('site_logo'); @endphp
+                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden">
+                            @if($footerLogo)
+                                <img src="{{ Storage::url($footerLogo) }}" alt="{{ __('messages.site_name') }}" class="w-full h-full object-cover">
+                            @else
+                                <span class="text-white font-bold text-lg">ن</span>
+                            @endif
                         </div>
                         <span class="font-bold">{{ __('messages.site_name') }}</span>
                     </div>

@@ -2,8 +2,8 @@
 
 return [
     // Header
-    'site_name' => 'Nangaran Information',
-    'site_url' => 'nangaran.ir',
+    'site_name' => 'Final Count',
+    'site_url' => 'finalcount.ir',
     'search_placeholder' => 'Search...',
     
     // Navigation

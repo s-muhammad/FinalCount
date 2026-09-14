@@ -2,8 +2,8 @@
 
 return [
     // Header
-    'site_name' => 'نگاران اطلاع‌رسانی',
-    'site_url' => 'nangaran.ir',
+    'site_name' => 'شمارش نهایی',
+    'site_url' => 'finalcount.ir',
     'search_placeholder' => 'جستجو...',
     
     // Navigation

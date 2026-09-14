@@ -4,7 +4,7 @@
 @section('header', 'تنظیمات سایت')
 
 @section('content')
-<form action="{{ route('admin.settings.update') }}" method="POST">
+<form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
     @csrf
     <div class="space-y-6">
         <div class="bg-white rounded-xl shadow-sm p-6">
@@ -35,6 +35,17 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">توضیحات سایت</label>
                     <input type="text" name="site_description" value="{{ $settings['site_description'] ?? '' }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary">
                 </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">لوگوی سایت</label>
+                    @if(!empty($settings['site_logo']))
+                        <div class="mb-3">
+                            <img src="{{ Storage::url($settings['site_logo']) }}" alt="لوگوی فعلی" class="w-16 h-16 rounded-full object-cover border border-gray-200">
+                        </div>
+                    @endif
+                    <input type="file" name="site_logo" accept="image/*" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary">
+                    <input type="hidden" name="site_logo_current" value="{{ $settings['site_logo'] ?? '' }}">
+                    <p class="text-xs text-gray-400 mt-1">فقط تصویر (JPG، PNG، WebP). اگر فایلی انتخاب نشود، لوگوی فعلی حفظ می‌شود.</p>
+                </div>
             </div>
         </div>
 
@@ -52,6 +63,15 @@
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-1">توضیحات</label>
                     <textarea name="countdown_description" rows="2" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary">{{ $settings['countdown_description'] ?? 'به حول و قوه الهی، تا ۲۵ سال آینده چیزی به نام رژیم صهیونیستی وجود نخواهد داشت.' }}</textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">رنگ پس‌زمینه</label>
+                    <input type="color" name="countdown_bg_color" value="{{ $settings['countdown_bg_color'] ?? '#1a4d2e' }}" class="w-full h-11 border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-primary cursor-pointer">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">تصویر پس‌زمینه (اختیاری)</label>
+                    <input type="file" name="countdown_bg_image" accept="image/*" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary">
+                    <p class="text-xs text-gray-400 mt-1">در صورت انتخاب، روی رنگ پس‌زمینه اعمال می‌شود.</p>
                 </div>
             </div>
         </div>

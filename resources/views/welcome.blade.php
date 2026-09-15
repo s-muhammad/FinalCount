@@ -107,7 +107,7 @@
             <p class="text-white/80 text-sm md:text-base mb-8 max-w-2xl mx-auto">
                 {{ __('messages.countdown_description') }}
             </p>
-            <div class="flex justify-center gap-2 md:gap-3 mb-6" style="direction: ltr;">
+            <div class="flex flex-wrap justify-center gap-2 md:gap-3 mb-6" style="direction: ltr;">
                 <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
                     <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.years).padStart(2, '0')"></div>
                     <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.years') }}</div>
@@ -127,6 +127,7 @@
                     <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.hours).padStart(2, '0')"></div>
                     <div class="text-[9px] md:text-[10px] text-white/50 mt-0.5">{{ __('messages.hours') }}</div>
                 </div>
+                <div class="w-full sm:hidden"></div>
                 <div class="flex items-center text-white/40 text-lg md:text-xl font-bold">:</div>
                 <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 md:px-4 py-2 md:py-3">
                     <div class="text-xl md:text-2xl lg:text-3xl font-bold text-white" x-text="String(countdown.minutes).padStart(2, '0')"></div>

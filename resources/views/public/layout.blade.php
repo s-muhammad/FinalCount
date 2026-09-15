@@ -69,14 +69,14 @@
                 <!-- Logo -->
                 <a href="{{ route('home') }}" class="flex items-center gap-2">
                     @php $siteLogo = \App\Models\Setting::getValue('site_logo'); @endphp
-                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden">
+                    <div class="w-10 h-12 ">
                         @if($siteLogo)
                             <img src="{{ Storage::url($siteLogo) }}" alt="{{ __('messages.site_name') }}" class="w-full h-full object-cover">
                         @else
                             <span class="text-white font-bold text-lg">ن</span>
                         @endif
                     </div>
-                    <div class="text-right hidden sm:block">
+                    <div class="text-right ">
                         <div class="text-primary font-bold text-sm">{{ __('messages.site_name') }}</div>
                         <div class="text-gray-500 text-xs">{{ __('messages.site_url') }}</div>
                     </div>
@@ -192,11 +192,11 @@
     <!-- Footer -->
     <footer class="bg-gray-800 text-white mt-12">
         <div class="max-w-7xl mx-auto px-4 py-12">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-3 gap-8">
                 <div>
                     <div class="flex items-center gap-3 mb-4">
                         @php $footerLogo = \App\Models\Setting::getValue('site_logo'); @endphp
-                        <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden">
+                        <div class="w-10 h-12">
                             @if($footerLogo)
                                 <img src="{{ Storage::url($footerLogo) }}" alt="{{ __('messages.site_name') }}" class="w-full h-full object-cover">
                             @else
@@ -232,14 +232,14 @@
                         @endif
                     </ul>
                 </div>
-                <div>
+                {{-- <div>
                     <h4 class="font-bold mb-4">{{ __('messages.contact_us') }}</h4>
                     <ul class="space-y-2 text-gray-400 text-sm">
                         <li>{{ __('messages.address') }}</li>
                         <li>{{ __('messages.phone') }}</li>
                         <li>{{ __('messages.email') }}</li>
                     </ul>
-                </div>
+                </div> --}}
             </div>
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
                 {{ __('messages.copyright') }}

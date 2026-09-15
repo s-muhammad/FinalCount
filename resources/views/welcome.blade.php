@@ -6,50 +6,56 @@
 <!-- Hero Section -->
 <section class="mb-6">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main Feature -->
+        <!-- Main Feature: اخبار ویژه -->
         <div class="lg:col-span-2 relative rounded-2xl overflow-hidden h-80 bg-gray-800">
-            @if($featuredNews && $featuredNews->image)
-                <img src="{{ Storage::url($featuredNews->image) }}" alt="{{ localize($featuredNews, 'title') }}" class="w-full h-full object-cover opacity-80">
-            @else
-                <img src="https://placehold.co/800x400/1a1a1a/white?text=speech" alt="" class="w-full h-full object-cover opacity-80">
-            @endif
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-            <div class="absolute bottom-0 right-0 p-6 text-white">
-                <h1 class="text-2xl font-bold mb-2">{{ localize($featuredNews, 'title') }}</h1>
-                <p class="text-sm text-gray-300 mb-4">{{ localize($featuredNews, 'summary') }}</p>
-                @if($featuredNews)
+            @if($featuredNews)
+                @if($featuredNews->image)
+                    <img src="{{ Storage::url($featuredNews->image) }}" alt="{{ localize($featuredNews, 'title') }}" class="w-full h-full object-cover">
+                @else
+                    <img src="https://placehold.co/800x400/1a1a1a/white?text=speech" alt="" class="w-full h-full object-cover opacity-80">
+                @endif
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                <div class="absolute bottom-0 right-0 p-6 text-white">
+                    <h1 class="text-2xl font-bold mb-2">{{ localize($featuredNews, 'title') }}</h1>
+                    <p class="text-sm text-gray-300 mb-4 line-clamp-2">{{ localize($featuredNews, 'summary') }}</p>
                     <a href="{{ route('public.news.show', $featuredNews) }}" class="bg-white/20 hover:bg-white/30 backdrop-blur px-4 py-2 rounded-lg text-sm transition inline-block">
                         {{ __('messages.view_full_statement') }}
                     </a>
-                @endif
-            </div>
-            <div class="absolute top-4 right-4">
-                <div class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold">
-                    {{ __('messages.new_statement') }}
                 </div>
-            </div>
+                <div class="absolute top-4 right-4">
+                    <div class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold">
+                        {{ __('messages.featured_news') }}
+                    </div>
+                </div>
+            @else
+                <div class="w-full h-full bg-gray-800 flex items-center justify-center">
+                    <p class="text-gray-400">{{ __('messages.no_news') }}</p>
+                </div>
+            @endif
         </div>
 
-        <!-- Side Features -->
-        <div class="space-y-4">
-            @if($latestMessages->count())
-                <a href="{{ route('public.messages.show', $latestMessages->first()) }}" class="block bg-gradient-to-br from-primary to-primary-light rounded-2xl p-6 text-white h-[152px] flex flex-col justify-center">
-                    <h3 class="text-lg font-bold mb-2">{{ localize($latestMessages->first(), 'title') }}</h3>
-                    <p class="text-sm text-white/80 line-clamp-2">{{ localize($latestMessages->first(), 'summary') }}</p>
-                </a>
-            @endif
-            @if($latestNews->count() > 1)
-                <a href="{{ route('public.news.show', $latestNews->skip(1)->first()) }}" class="block bg-white rounded-2xl p-4 h-[152px]">
-                    <p class="text-gray-700 text-sm line-clamp-3">
-                        {{ localize($latestNews->skip(1)->first(), 'summary') }}
-                    </p>
-                    <div class="mt-4 flex items-center gap-2">
-                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                            <span class="text-white text-xs">ن</span>
-                        </div>
-                        <span class="text-xs text-gray-500">{{ $latestNews->skip(1)->first()?->published_at?->diffForHumans() }}</span>
+        <!-- Small Banner: آخرین بیانات رهبر -->
+        <div class="lg:h-[320px]">
+            @if($latestSpeech)
+                <a href="{{ route('public.messages.show', $latestSpeech) }}" class="block relative rounded-2xl overflow-hidden h-full min-h-[200px] bg-primary">
+                    @if($latestSpeech->image)
+                        <img src="{{ Storage::url($latestSpeech->image) }}" alt="{{ localize($latestSpeech, 'title') }}" class="w-full h-full object-cover">
+                    @endif
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent"></div>
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-white/20 backdrop-blur px-3 py-1.5 rounded-full text-xs text-white font-bold">
+                            {{ __('messages.speech') }} 🎤
+                        </span>
+                    </div>
+                    <div class="absolute bottom-0 right-0 p-5 text-white">
+                        <h3 class="font-bold text-lg mb-1 leading-relaxed">{{ localize($latestSpeech, 'title') }}</h3>
+                        <span class="text-xs text-gray-300">{{ $latestSpeech->published_at?->diffForHumans() ?? $latestSpeech->created_at->diffForHumans() }}</span>
                     </div>
                 </a>
+            @else
+                <div class="block relative rounded-2xl overflow-hidden h-full min-h-[200px] bg-primary flex items-center justify-center">
+                    <span class="text-white/60 text-sm">{{ __('messages.no_messages') }}</span>
+                </div>
             @endif
         </div>
     </div>

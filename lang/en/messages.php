@@ -108,7 +108,7 @@ return [
     
     // New Leader Statement
     'new_statement' => 'New Statement from the Supreme Leader',
-    'view_full_statement' => 'View Full Statement',
+    'view_full_statement' => 'View News',
     
     // Common
     'featured' => 'Featured',

@@ -31,6 +31,9 @@ class PublicController extends Controller
         $latestMessages = $this->isModuleActive('messages')
             ? Message::where('status', 'published')->latest()->take(3)->get()
             : collect();
+        $latestSpeech = $this->isModuleActive('messages')
+            ? Message::where('status', 'published')->where('type', 'speech')->latest()->first()
+            : null;
         $latestMedia = $this->isModuleActive('media')
             ? Media::where('status', 'published')->latest()->take(6)->get()
             : collect();
@@ -49,7 +52,7 @@ class PublicController extends Controller
             'contact' => $this->isModuleActive('contact'),
         ];
 
-        return view('welcome', compact('latestNews', 'featuredNews', 'latestMessages', 'latestMedia', 'quotes', 'gallery', 'activeModules'));
+        return view('welcome', compact('latestNews', 'featuredNews', 'latestMessages', 'latestSpeech', 'latestMedia', 'quotes', 'gallery', 'activeModules'));
     }
 
     public function setLocale($locale)

@@ -108,7 +108,7 @@ return [
     
     // New Leader Statement
     'new_statement' => 'بيانات جديدة من المرشد الأعلى',
-    'view_full_statement' => 'عرض البيان الكامل',
+    'view_full_statement' => 'عرض الخبر',
     
     // Common
     'featured' => 'مميز',

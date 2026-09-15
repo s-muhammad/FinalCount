@@ -108,7 +108,7 @@ return [
     
     // New Leader Statement
     'new_statement' => 'بیانات جدید رهبر معظم انقلاب',
-    'view_full_statement' => 'مشاهده کامل بیانات',
+    'view_full_statement' => 'مشاهده خبر',
     
     // Common
     'featured' => 'ویژه',

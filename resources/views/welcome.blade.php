@@ -42,11 +42,11 @@
                         <img src="{{ Storage::url($latestSpeech->image) }}" alt="{{ localize($latestSpeech, 'title') }}" class="w-full h-full object-cover">
                     @endif
                     <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent"></div>
-                    <div class="absolute top-4 right-4">
+                    {{-- <div class="absolute top-4 right-4">
                         <span class="bg-white/20 backdrop-blur px-3 py-1.5 rounded-full text-xs text-white font-bold">
                             {{ __('messages.speech') }} 🎤
                         </span>
-                    </div>
+                    </div> --}}
                     <div class="absolute bottom-0 right-0 p-5 text-white">
                         <h3 class="font-bold text-lg mb-1 leading-relaxed">{{ localize($latestSpeech, 'title') }}</h3>
                         <span class="text-xs text-gray-300">{{ $latestSpeech->published_at?->diffForHumans() ?? $latestSpeech->created_at->diffForHumans() }}</span>

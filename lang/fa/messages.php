@@ -96,7 +96,7 @@ return [
     
     // Countdown
     'countdown_announcement' => 'سخنرانی تاریخی رهبر شهید انقلاب',
-    'countdown_title' => 'شما ۲۵ سال آینده را خواهید دید',
+    'countdown_title' => 'شما ۲۵ سال آینده را نخواهید دید',
     'countdown_description' => 'به حول و قوه الهی، تا ۲۵ سال آینده چیزی به نام رژیم صهیونیستی وجود نخواهد داشت.',
     'years' => 'سال',
     'months' => 'ماه',

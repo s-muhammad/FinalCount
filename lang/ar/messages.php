@@ -96,7 +96,7 @@ return [
     
     // Countdown
     'countdown_announcement' => 'الخطاب التاريخي لقائد الثورة الشهيد',
-    'countdown_title' => 'سترون الـ 25 عاماً القادمة',
+    'countdown_title' => 'لن تروا الـ 25 عاماً القادمة',
     'countdown_description' => 'بمشيئة الله، بعد 25 عاماً لن يكون هناك ما يسمى بالكيان الصهيوني.',
     'years' => 'سنة',
     'months' => 'شهر',

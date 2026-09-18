@@ -31,9 +31,13 @@ class PublicController extends Controller
         $latestMessages = $this->isModuleActive('messages')
             ? Message::where('status', 'published')->latest()->take(3)->get()
             : collect();
-        $latestSpeech = $this->isModuleActive('messages')
-            ? Message::where('status', 'published')->where('type', 'speech')->latest()->first()
-            : null;
+        $latestSpeech = null;
+        if ($this->isModuleActive('messages')) {
+            $latestSpeech = Message::where('status', 'published')->where('type', 'speech')->latest()->first();
+            if (!$latestSpeech) {
+                $latestSpeech = Message::where('status', 'published')->latest()->first();
+            }
+        }
         $latestMedia = $this->isModuleActive('media')
             ? Media::where('status', 'published')->latest()->take(6)->get()
             : collect();

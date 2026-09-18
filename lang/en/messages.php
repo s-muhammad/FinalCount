@@ -96,7 +96,7 @@ return [
     
     // Countdown
     'countdown_announcement' => 'Historic Speech of the Martyred Leader of the Revolution',
-    'countdown_title' => 'You will see the next 25 years',
+    'countdown_title' => 'You will not see the next 25 years',
     'countdown_description' => 'By the will of God, in 25 years there will be no such thing as the Zionist regime.',
     'years' => 'Years',
     'months' => 'Months',

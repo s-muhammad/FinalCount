@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\InterviewController;
 use App\Http\Controllers\Admin\QuoteController;
 use App\Http\Controllers\Admin\GalleryController;
+use App\Http\Controllers\Admin\RssFeedController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\PublicController;
 
@@ -45,6 +46,14 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::resource('gallery', GalleryController::class);
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::get('rss', [RssFeedController::class, 'index'])->name('rss.index');
+    Route::get('rss/create', [RssFeedController::class, 'create'])->name('rss.create');
+    Route::post('rss', [RssFeedController::class, 'store'])->name('rss.store');
+    Route::get('rss/{rss}/edit', [RssFeedController::class, 'edit'])->name('rss.edit');
+    Route::put('rss/{rss}', [RssFeedController::class, 'update'])->name('rss.update');
+    Route::delete('rss/{rss}', [RssFeedController::class, 'destroy'])->name('rss.destroy');
+    Route::get('rss/logs', [RssFeedController::class, 'logs'])->name('rss.logs');
+    Route::post('rss/run', [RssFeedController::class, 'runNow'])->name('rss.run');
 });
 
 require __DIR__.'/auth.php';

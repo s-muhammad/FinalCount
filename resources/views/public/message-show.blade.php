@@ -21,7 +21,7 @@
                 <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-4 leading-relaxed">{{ localize($message, 'title') }}</h1>
                 <div class="flex items-center gap-4 text-sm text-gray-500 mb-8 pb-6 border-b">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <span>{{ $message->published_at?->format('Y/m/d H:i') ?? $message->created_at->format('Y/m/d H:i') }}</span>
+                    <span>{{ persian_date($message->published_at ?? $message->created_at, true) }}</span>
                 </div>
                 @if($message->summary)
                     <div class="bg-primary/5 border-r-4 border-primary rounded-lg p-5 mb-8 text-gray-800 font-medium leading-relaxed">
@@ -29,7 +29,7 @@
                     </div>
                 @endif
                 <div class="article-body">
-                    {!! localize($message, 'body') !!}
+                    {!! article_html(localize($message, 'body')) !!}
                 </div>
             </div>
         </article>
@@ -59,6 +59,8 @@
                 @endforelse
             </div>
         </div>
+
+        @include('public.partials.ad-banner')
 
         <a href="{{ route('public.messages') }}" class="block bg-primary/5 text-primary text-center py-3 rounded-xl font-medium hover:bg-primary/10 transition flex items-center justify-center gap-2">
             <svg class="w-4 h-4 rotate-180 rtl:rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>

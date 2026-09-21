@@ -37,7 +37,7 @@
                                 {{ $item->status === 'published' ? 'منتشر شده' : ($item->status === 'draft' ? 'پیش‌نویس' : 'بایگانی') }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-500">{{ $item->created_at->format('Y/m/d') }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">{{ persian_date($item->created_at) }}</td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
                                 <a href="{{ route('admin.messages.edit', $item) }}" class="p-1.5 hover:bg-gray-100 rounded-lg">

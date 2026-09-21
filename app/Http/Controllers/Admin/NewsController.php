@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\News;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class NewsController extends Controller
@@ -90,6 +91,10 @@ class NewsController extends Controller
 
     public function destroy(News $news)
     {
+        if ($news->image) {
+            Storage::disk('public')->delete($news->image);
+        }
+
         $news->delete();
         return redirect()->route('admin.news.index')->with('success', 'خبر با موفقیت حذف شد');
     }

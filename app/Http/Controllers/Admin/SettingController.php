@@ -30,6 +30,9 @@ class SettingController extends Controller
             'social_twitter' => 'nullable|string|max:500',
             'social_youtube' => 'nullable|string|max:500',
             'social_telegram' => 'nullable|string|max:500',
+            'ad_banner_enabled' => 'nullable|boolean',
+            'ad_banner_image' => 'nullable|image|mimes:jpeg,png,webp|max:2048',
+            'ad_banner_link' => 'nullable|string|max:2048',
             'site_logo_current' => 'nullable|string',
         ]);
 
@@ -53,6 +56,19 @@ class SettingController extends Controller
                 \Storage::disk('public')->delete($oldBgImage);
             }
         }
+
+        // اگر تصویر بنر تبلیغاتی ارسال شده ذخیره شود
+        if ($request->hasFile('ad_banner_image')) {
+            $path = $request->file('ad_banner_image')->store('settings', 'public');
+            $validated['ad_banner_image'] = $path;
+            $oldAdImage = Setting::getValue('ad_banner_image', '');
+            if ($oldAdImage) {
+                \Storage::disk('public')->delete($oldAdImage);
+            }
+        }
+
+        unset($validated['ad_banner_enabled']);
+        Setting::setValue('ad_banner_enabled', $request->boolean('ad_banner_enabled') ? '1' : '0');
 
         foreach ($validated as $key => $value) {
             Setting::setValue($key, $value);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Gallery;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class GalleryController extends Controller
 {
@@ -77,6 +78,10 @@ class GalleryController extends Controller
 
     public function destroy(Gallery $item)
     {
+        if ($item->image) {
+            Storage::disk('public')->delete($item->image);
+        }
+
         $item->delete();
         return redirect()->route('admin.gallery.index')->with('success', 'تصویر با موفقیت حذف شد');
     }

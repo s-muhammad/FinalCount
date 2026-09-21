@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Quote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class QuoteController extends Controller
 {
@@ -77,6 +78,10 @@ class QuoteController extends Controller
 
     public function destroy(Quote $quote)
     {
+        if ($quote->image) {
+            Storage::disk('public')->delete($quote->image);
+        }
+
         $quote->delete();
         return redirect()->route('admin.quotes.index')->with('success', 'نقل‌قول با موفقیت حذف شد');
     }

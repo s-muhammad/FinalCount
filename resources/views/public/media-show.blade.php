@@ -30,7 +30,7 @@
                 </div>
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">{{ localize($medium, 'title') }}</h1>
                 <div class="flex items-center gap-4 text-sm text-gray-500 mb-6 pb-6 border-b">
-                    <span>{{ $medium->created_at->format('Y/m/d') }}</span>
+                    <span>{{ persian_date($medium->created_at) }}</span>
                 </div>
                 @if($medium->description)
                     <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed">
@@ -69,10 +69,12 @@
                 </div>
                 <div class="flex justify-between">
                     <dt class="text-gray-500">{{ __('messages.date') }}:</dt>
-                    <dd class="text-gray-800">{{ $medium->created_at->format('Y/m/d') }}</dd>
+                    <dd class="text-gray-800">{{ persian_date($medium->created_at) }}</dd>
                 </div>
             </dl>
         </div>
+
+        @include('public.partials.ad-banner')
 
         <a href="{{ route('public.media') }}" class="block bg-primary/5 text-primary text-center py-3 rounded-xl font-medium hover:bg-primary/10 transition">
             {{ __('messages.back_to_media') }}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Interview;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class InterviewController extends Controller
@@ -96,6 +97,10 @@ class InterviewController extends Controller
 
     public function destroy(Interview $interview)
     {
+        if ($interview->image) {
+            Storage::disk('public')->delete($interview->image);
+        }
+
         $interview->delete();
         return redirect()->route('admin.interviews.index')->with('success', 'گفتگو با موفقیت حذف شد');
     }

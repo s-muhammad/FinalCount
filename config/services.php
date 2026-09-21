@@ -35,4 +35,37 @@ return [
         ],
     ],
 
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'gemini'),
+    ],
+
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-1.5-flash'),
+    ],
+
+    'mistral' => [
+        'key' => env('MISTRAL_API_KEY'),
+        'model' => env('MISTRAL_MODEL', 'mistral-small-latest'),
+        'base_url' => 'https://api.mistral.ai/v1',
+    ],
+
+    'gapgpt' => [
+        'key' => env('GAPGPT_API_KEY'),
+        'model' => env('GAPGPT_MODEL', 'gpt-4o-mini'),
+        'base_url' => 'https://api.gapgpt.app/v1',
+    ],
+
+    'deepseek' => [
+        'key' => env('DEEPSEEK_API_KEY'),
+        'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
+        'base_url' => 'https://api.deepseek.com/v1',
+    ],
+
+    'qwen' => [
+        'key' => env('QWEN_API_KEY'),
+        'model' => env('QWEN_MODEL', 'qwen-plus'),
+        'base_url' => 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    ],
+
 ];

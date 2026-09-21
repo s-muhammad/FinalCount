@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Media;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class MediaController extends Controller
 {
@@ -95,6 +96,14 @@ class MediaController extends Controller
 
     public function destroy(Media $medium)
     {
+        if ($medium->thumbnail) {
+            Storage::disk('public')->delete($medium->thumbnail);
+        }
+
+        if ($medium->file_path) {
+            Storage::disk('public')->delete($medium->file_path);
+        }
+
         $medium->delete();
         return redirect()->route('admin.media.index')->with('success', 'رسانه با موفقیت حذف شد');
     }

@@ -13,13 +13,13 @@ class DatabaseSeeder extends Seeder
     {
         User::create([
             'name' => 'ادمین',
-            'email' => 'admin@nangaran.ir',
+            'email' => 'admin@finalcount.ir',
             'password' => Hash::make('password'),
         ]);
 
         $settings = [
-            ['key' => 'site_name', 'value' => 'نگاران'],
-            ['key' => 'site_description', 'value' => 'پایگاه اطلاع‌رسانی حضرت آیت‌الله العظمی خامنه‌ای'],
+            ['key' => 'site_name', 'value' => 'شمارش نهایی'],
+            ['key' => 'site_description', 'value' => 'پایگاه شمارش نهایی'],
             ['key' => 'countdown_target_date', 'value' => '2040-09-09'],
             ['key' => 'countdown_title', 'value' => 'شما ۲۵ سال آینده را خواهید دید'],
             ['key' => 'countdown_description', 'value' => 'به حول و قوه الهی، تا ۲۵ سال آینده چیزی به نام رژیم صهیونیستی وجود نخواهد داشت.'],

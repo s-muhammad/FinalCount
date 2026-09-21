@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MessageController extends Controller
@@ -90,6 +91,10 @@ class MessageController extends Controller
 
     public function destroy(Message $message)
     {
+        if ($message->image) {
+            Storage::disk('public')->delete($message->image);
+        }
+
         $message->delete();
         return redirect()->route('admin.messages.index')->with('success', 'پیام با موفقیت حذف شد');
     }

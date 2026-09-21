@@ -15,14 +15,14 @@ return [
     'contact' => 'Contact Us',
     
     // Footer
-    'footer_description' => 'Information platform of the Office of Preservation and Publication of Ayatollah Khamenei\'s works',
+    'footer_description' => 'Information platform of the Office of finalcount',
     'quick_access' => 'Quick Access',
     'links' => 'Links',
     'contact_us' => 'Contact Us',
     'address' => 'Tehran, Vali-Asr Street',
     'phone' => 'Phone: +98-21-11111111',
     'email' => 'Email: info@nangaran.ir',
-    'copyright' => 'All rights reserved for Nangaran.',
+    'copyright' => 'All rights reserved for finalcount.',
     
     // Home Page
     'latest_news' => 'Latest News',

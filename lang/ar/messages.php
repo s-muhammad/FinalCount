@@ -15,14 +15,14 @@ return [
     'contact' => 'اتصل بنا',
     
     // Footer
-    'footer_description' => 'منصة الإعلام التابعة لمكتب الحفظ والنشر لآثار�� Ayatollah العظمى الخامنئي',
+    'footer_description' => 'finalcount.ir',
     'quick_access' => 'الوصول السريع',
     'links' => 'الروابط',
     'contact_us' => 'اتصل بنا',
     'address' => 'طهران، شارع ولايت',
     'phone' => 'الهاتف: ۰۲۱-۱۱۱۱۱۱۱۱',
     'email' => 'البريد الإلكتروني: info@nangaran.ir',
-    'copyright' => 'جميع الحقوق محفوظة لنغاران.',
+    'copyright' => 'جميع الحقوق محفوظة finalcount.',
     
     // Home Page
     'latest_news' => 'آخر الأخبار',

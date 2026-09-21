@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ArticleController extends Controller
@@ -92,6 +93,10 @@ class ArticleController extends Controller
 
     public function destroy(Article $article)
     {
+        if ($article->image) {
+            Storage::disk('public')->delete($article->image);
+        }
+
         $article->delete();
         return redirect()->route('admin.articles.index')->with('success', 'مقاله با موفقیت حذف شد');
     }

@@ -54,8 +54,7 @@ class RssImportCommand extends Command
             }
 
             foreach ($items as $item) {
-                if (RssImport::where('source_url', $item['link'])->exists()
-                    || News::where('source_url', $item['link'])->exists()) {
+                if (News::where('source_url_hash', sha1($item['link']))->exists()) {
                     $totals['skipped']++;
 
                     continue;
@@ -105,6 +104,7 @@ class RssImportCommand extends Command
         $news->image = $image;
         $news->slug = $this->uniqueSlug($item['title']);
         $news->source_url = $item['link'];
+        $news->source_url_hash = sha1($item['link']);
         $news->status = 'draft';
         $news->published_at = $item['pub_date'];
         $news->save();

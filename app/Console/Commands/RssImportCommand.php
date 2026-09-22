@@ -15,7 +15,7 @@ use Throwable;
 
 class RssImportCommand extends Command
 {
-    protected $signature = 'news:import-rss {--sync : Run AI translation synchronously instead of queueing} {--retry-failed : Re-run AI translation for previously failed imports}';
+    protected $signature = 'news:import-rss {--sync : Run AI translation synchronously instead of queueing} {--retry-failed : Re-run AI translation for failed or pending imports} {--force : Translate even non-draft (published) news}';
 
     protected $description = 'Import news items from active RSS feeds and dispatch AI translation';
 
@@ -112,19 +112,19 @@ class RssImportCommand extends Command
 
     private function retryFailed(): int
     {
-        $failed = RssImport::where('status', 'failed')
+        $imports = RssImport::whereIn('status', ['failed', 'pending'])
             ->whereNotNull('news_id')
             ->get();
 
-        if ($failed->isEmpty()) {
-            $this->warn('No failed imports to retry.');
+        if ($imports->isEmpty()) {
+            $this->warn('No failed or pending imports to process.');
 
             return 0;
         }
 
         $count = 0;
 
-        foreach ($failed as $import) {
+        foreach ($imports as $import) {
             $news = $import->news;
 
             if (! $news) {
@@ -132,17 +132,17 @@ class RssImportCommand extends Command
             }
 
             if ($this->option('sync')) {
-                (new AiTranslateNewsJob($news))->handle(app(\App\Services\AiService::class));
-                $this->info("Retried (sync): {$import->raw_title}");
+                (new AiTranslateNewsJob($news, $this->option('force')))->handle(app(\App\Services\AiService::class));
+                $this->info("Processed (sync): {$import->raw_title} → ".$import->fresh()->status);
             } else {
-                dispatch(new AiTranslateNewsJob($news));
-                $this->info("Retried (queued): {$import->raw_title}");
+                dispatch(new AiTranslateNewsJob($news, $this->option('force')));
+                $this->info("Queued: {$import->raw_title}");
             }
 
             $count++;
         }
 
-        $this->info("Retried {$count} failed import(s).");
+        $this->info("Processed {$count} import(s).");
 
         return $count;
     }

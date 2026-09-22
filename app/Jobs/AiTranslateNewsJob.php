@@ -18,13 +18,13 @@ class AiTranslateNewsJob implements ShouldQueue
 
     public $tries = 1;
 
-    public function __construct(public News $news) {}
+    public function __construct(public News $news, public bool $force = false) {}
 
     public function handle(AiService $ai): void
     {
         $import = RssImport::where('news_id', $this->news->id)->first();
 
-        if ($this->news->status !== 'draft') {
+        if (! $this->force && $this->news->status !== 'draft') {
             if ($import && $import->status !== 'translated') {
                 $import->update(['status' => 'skipped', 'error' => 'News is not a draft anymore; skipped.']);
             }

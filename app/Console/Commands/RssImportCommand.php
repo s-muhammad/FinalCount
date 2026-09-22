@@ -54,7 +54,8 @@ class RssImportCommand extends Command
             }
 
             foreach ($items as $item) {
-                if (RssImport::where('source_url', $item['link'])->exists()) {
+                if (RssImport::where('source_url', $item['link'])->exists()
+                    || News::where('source_url', $item['link'])->exists()) {
                     $totals['skipped']++;
 
                     continue;
@@ -103,6 +104,7 @@ class RssImportCommand extends Command
         $news->body = $item['description'];
         $news->image = $image;
         $news->slug = $this->uniqueSlug($item['title']);
+        $news->source_url = $item['link'];
         $news->status = 'draft';
         $news->published_at = $item['pub_date'];
         $news->save();
@@ -112,20 +114,33 @@ class RssImportCommand extends Command
 
     private function retryFailed(): int
     {
-        $imports = RssImport::whereIn('status', ['failed', 'pending'])
-            ->whereNotNull('news_id')
-            ->get();
+        $targets = [];
 
-        if ($imports->isEmpty()) {
-            $this->warn('No failed or pending imports to process.');
+        foreach (RssImport::whereIn('status', ['failed', 'pending'])
+            ->whereNotNull('news_id')
+            ->get() as $import) {
+            $targets[$import->news_id] = $import->raw_title ?: $import->source_url;
+        }
+
+        if ($this->option('force')) {
+            News::whereNotNull('source_url')
+                ->where(fn ($q) => $q->whereNull('title_en')->orWhere('title_en', '')->orWhereNull('body_en')->orWhere('body_en', ''))
+                ->get()
+                ->each(function (News $news) use (&$targets) {
+                    $targets[$news->id] = $news->title;
+                });
+        }
+
+        if ($targets === []) {
+            $this->warn('No failed, pending, or untranslated imports to process.');
 
             return 0;
         }
 
         $count = 0;
 
-        foreach ($imports as $import) {
-            $news = $import->news;
+        foreach ($targets as $newsId => $label) {
+            $news = News::find($newsId);
 
             if (! $news) {
                 continue;
@@ -133,10 +148,11 @@ class RssImportCommand extends Command
 
             if ($this->option('sync')) {
                 (new AiTranslateNewsJob($news, $this->option('force')))->handle(app(\App\Services\AiService::class));
-                $this->info("Processed (sync): {$import->raw_title} → ".$import->fresh()->status);
+                $done = $news->fresh()->title_en ? 'OK' : 'FAILED';
+                $this->info("Processed (sync): {$label} → {$done}");
             } else {
                 dispatch(new AiTranslateNewsJob($news, $this->option('force')));
-                $this->info("Queued: {$import->raw_title}");
+                $this->info("Queued: {$label}");
             }
 
             $count++;

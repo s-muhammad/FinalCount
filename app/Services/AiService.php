@@ -125,41 +125,45 @@ class AiService
     private function buildPrompt(string $title, string $summary, string $body): string
     {
         return <<<PROMPT
-You are a professional news translator and SEO specialist.
-
-Translate the following news article into Persian (fa), English (en) and Arabic (ar).
+You are the senior editor of a professional news agency. Treat the supplied raw news item like a tip from a reporter: rewrite it yourself into a complete, publish-ready article in Persian (fa), Arabic (ar) and English (en). Your writing must be indistinguishable from a news site editor's work — fuller, clearer and more meaningful than the raw text.
 
 Rules:
-- If the original text is already in one of these languages, keep that language version as-is (do not re-translate).
-- Title: crisp, SEO-friendly, under 80 characters.
-- Summary: keep it SHORT — 2-3 sentences that act as the meta description. Never duplicate the body.
-- Body: write a COMPLETE, expanded news article of 250-450 words (about 3-5 paragraphs). Expand and deepen the provided information into publish-ready full text. It must be much longer and more detailed than the summary. If the source body is short or empty, write the article based on the title and summary.
-- Structure the body for a news page — this is REQUIRED, never produce a plain unbroken text: divide the body into 2-4 sections. The body string must use these exact line-based markers:
-  * A section heading alone on its own line, starting with exactly "## " (for H2). Example line: "## تحلیل محتوا"
+- DO NOT just rephrase or shorten the raw snippet. Create a full, standalone article in EVERY language, writing like a news editor:
+  * Opening lead: who, what, when, where and why (a strong first paragraph).
+  * Context and background: why it matters, what led to it.
+  * Statements and details: what officials/people said, facts and numbers.
+  * Perspective and possible consequences.
+  * A proper closing paragraph.
+- Each article must be SUBSTANTIAL: 6-8 paragraphs, roughly 300-400 words per language. The body must be far longer than the summary. Never leave the reader with half an idea.
+- Keep the meaning faithful to the source; only expand with plausible, editorial context. Do not invent verifiable facts beyond general framing, names already given, and common-sense context.
+- Title: a compelling, SEO-friendly news headline, under 80 characters.
+- Summary: 2-3 short sentences as meta description — a teaser, under 200 characters, never a duplicate of the body, no markdown.
+- Structure every long body with line-based markers (REQUIRED):
+  * A section heading alone on its own line starting with exactly "## " (H2) — use at least two of them.
   * A subheading alone on a line starting with "### "
-  * Paragraphs separated from each other (and from headings) by a blank line
+  * Paragraphs separated from each other (and from headings) by a BLANK line
   * Bullet lists with lines starting with "- "
   * A quotable sentence alone on a line starting with "> "
-- The body must contain at least one "## " heading, preceded by its paragraph(s).
-- Do NOT include any HTML tags and no other markdown symbols.
-- Also provide 5-8 SEO keywords (relevant to the article).
+- No HTML tags and no other markdown symbols.
+- Provide 5-8 SEO keywords relevant to the article.
 
-Here is the exact required BODY format (a real example of an "en" body value — follow this pattern in every language):
+Here is the exact required BODY pattern (a real example of an "en" body — follow this in every language):
 
-## Key Findings
+## Agreement Reached After Negotiations
 
-The agreement was signed after months of negotiations between the parties.
+The two sides signed a landmark agreement on Tuesday in the capital, ending months of stalled talks. The deal is expected to unlock significant economic cooperation between the parties.
 
-## International Reaction
+> "This is a historic step for both nations," a senior official said.
 
-- Iranian officials welcomed the outcome
-- Regional partners expressed their support
+## What The Accord Includes
 
-> Analysts call the move a turning point.
+- Tariff reductions on key exports over the coming three years
+- A joint committee to oversee implementation
+- New visas for business travelers
 
-## Next Steps
+## Regional Reaction
 
-Implementation is expected to begin early next year. Further talks will address the remaining details.
+Neighboring countries welcomed the deal, while analysts note the next phase will test commitment on both sides. Full implementation is expected to begin early next year.
 
 Respond with ONLY valid JSON:
 {
@@ -169,13 +173,13 @@ Respond with ONLY valid JSON:
   "keywords": ["keyword1", "keyword2"]
 }
 
-TITLE:
+RAW TITLE:
 {$title}
 
-SUMMARY:
+RAW SUMMARY:
 {$summary}
 
-BODY:
+RAW BODY:
 {$body}
 PROMPT;
     }

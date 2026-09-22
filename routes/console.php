@@ -8,6 +8,6 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('news:import-rss')
+Schedule::command('news:import-rss --sync --retry-failed')
     ->everyThirtyMinutes()
     ->withoutOverlapping();

@@ -123,8 +123,7 @@ class RssImportCommand extends Command
         }
 
         if ($this->option('force')) {
-            News::whereNotNull('source_url')
-                ->where(fn ($q) => $q->whereNull('title_en')->orWhere('title_en', '')->orWhereNull('body_en')->orWhere('body_en', ''))
+            News::where(fn ($q) => $q->whereNull('title_en')->orWhere('title_en', '')->orWhereNull('body_en')->orWhere('body_en', ''))
                 ->get()
                 ->each(function (News $news) use (&$targets) {
                     $targets[$news->id] = $news->title;

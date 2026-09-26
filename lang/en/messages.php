@@ -10,6 +10,7 @@ return [
     'home' => 'Home',
     'news' => 'News',
     'messages' => 'Messages',
+    'messages_box' => "The Leader's Messages",
     'media' => 'Media',
     'culture' => 'Culture',
     'contact' => 'Contact Us',

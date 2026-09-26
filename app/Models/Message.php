@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Message extends Model
 {
@@ -19,6 +20,11 @@ class Message extends Model
     protected $casts = [
         'published_at' => 'datetime',
     ];
+
+    public function people(): MorphToMany
+    {
+        return $this->morphToMany(Person::class, 'personable');
+    }
 
     public function translatable(): array
     {

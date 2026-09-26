@@ -28,6 +28,7 @@ Route::get('/messages/{message}', [PublicController::class, 'messageShow'])->nam
 Route::get('/media', [PublicController::class, 'media'])->name('public.media');
 Route::get('/media/{medium}', [PublicController::class, 'mediaShow'])->name('public.media.show');
 Route::get('/culture', [PublicController::class, 'culture'])->name('public.culture');
+Route::get('/people/{person}', [PublicController::class, 'peopleShow'])->name('public.people.show');
 Route::get('/contact', [PublicController::class, 'contact'])->name('public.contact');
 Route::post('/contact', [PublicController::class, 'contactStore'])->name('public.contact.store');
 
@@ -44,6 +45,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::resource('interviews', InterviewController::class);
     Route::resource('quotes', QuoteController::class);
     Route::resource('gallery', GalleryController::class);
+    Route::resource('people', \App\Http\Controllers\Admin\PeopleController::class);
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingController::class, 'update'])->name('settings.update');
     Route::get('rss', [RssFeedController::class, 'index'])->name('rss.index');
@@ -54,6 +56,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::delete('rss/{rss}', [RssFeedController::class, 'destroy'])->name('rss.destroy');
     Route::get('rss/logs', [RssFeedController::class, 'logs'])->name('rss.logs');
     Route::post('rss/run', [RssFeedController::class, 'runNow'])->name('rss.run');
+    Route::post('rss/{rssImport}/reject', [RssFeedController::class, 'reject'])->name('rss.reject');
+    Route::post('rss/{rssImport}/convert', [RssFeedController::class, 'convert'])->name('rss.convert');
 });
 
 require __DIR__.'/auth.php';

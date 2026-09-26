@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Message;
+use App\Models\Person;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -18,7 +19,9 @@ class MessageController extends Controller
 
     public function create()
     {
-        return view('admin.messages.create');
+        $people = Person::orderBy('name')->get();
+
+        return view('admin.messages.create', compact('people'));
     }
 
     public function store(Request $request)
@@ -37,15 +40,20 @@ class MessageController extends Controller
             'type' => 'required|in:speech,message,decree',
             'status' => 'required|in:draft,published,archived',
             'published_at' => 'nullable|date',
+            'people_ids' => 'nullable|array',
+            'people_ids.*' => 'integer|exists:people,id',
         ]);
 
         $validated['slug'] = Str::slug($request->title);
+
+        unset($validated['people_ids']);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('messages', 'public');
         }
 
-        Message::create($validated);
+        $message = Message::create($validated);
+        $message->people()->sync($request->input('people_ids', []));
 
         return redirect()->route('admin.messages.index')->with('success', 'پیام با موفقیت ایجاد شد');
     }
@@ -57,7 +65,10 @@ class MessageController extends Controller
 
     public function edit(Message $message)
     {
-        return view('admin.messages.edit', compact('message'));
+        $people = Person::orderBy('name')->get();
+        $selectedPeople = $message->people;
+
+        return view('admin.messages.edit', compact('message', 'people', 'selectedPeople'));
     }
 
     public function update(Request $request, Message $message)
@@ -76,15 +87,20 @@ class MessageController extends Controller
             'type' => 'required|in:speech,message,decree',
             'status' => 'required|in:draft,published,archived',
             'published_at' => 'nullable|date',
+            'people_ids' => 'nullable|array',
+            'people_ids.*' => 'integer|exists:people,id',
         ]);
 
         $validated['slug'] = Str::slug($request->title);
+
+        unset($validated['people_ids']);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('messages', 'public');
         }
 
         $message->update($validated);
+        $message->people()->sync($request->input('people_ids', []));
 
         return redirect()->route('admin.messages.index')->with('success', 'پیام با موفقیت بروزرسانی شد');
     }

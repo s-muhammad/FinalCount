@@ -182,7 +182,7 @@
         @if($activeModules['messages'] ?? true)
         <div class="bg-white rounded-2xl p-6 shadow-sm">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-bold text-primary">{{ __('messages.messages') }}</h2>
+                <h2 class="text-lg font-bold text-primary">{{ __('messages.messages_box') }}</h2>
                 <a href="{{ route('public.messages') }}" class="text-sm text-primary hover:underline">{{ __('messages.view_all') }}</a>
             </div>
             <div class="space-y-4">
@@ -199,6 +199,38 @@
             </div>
         </div>
         @endif
+    </div>
+</section>
+@endif
+
+<!-- People & Martyrs -->
+@if($people->isNotEmpty())
+<section class="mb-6">
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
+                <h2 class="text-lg font-bold text-primary">چهره‌ها و شهدا</h2>
+            </div>
+        </div>
+        <div class="flex gap-5 overflow-x-auto scrollbar-hide pb-2" style="-webkit-overflow-scrolling: touch;">
+            @foreach($people as $person)
+                <a href="{{ route('public.people.show', $person) }}" class="flex flex-col items-center flex-shrink-0 w-28 group">
+                    <div class="relative">
+                        <img src="{{ Storage::url($person->image) }}" alt="{{ $person->name }}"
+                             class="w-24 h-24 rounded-full object-cover border-4 {{ $person->is_martyr ? 'border-green-600' : 'border-primary/30' }} group-hover:scale-105 transition duration-300">
+                        @if($person->is_martyr)
+                            <span class="absolute -bottom-1 right-1/2 translate-x-1/2 bg-green-600 text-white text-[9px] px-2 py-0.5 rounded-full whitespace-nowrap">شهید</span>
+                        @endif
+                    </div>
+                    <span class="text-sm text-gray-700 group-hover:text-primary mt-3 text-center leading-snug">{{ $person->name }}</span>
+                </a>
+            @endforeach
+        </div>
     </div>
 </section>
 @endif

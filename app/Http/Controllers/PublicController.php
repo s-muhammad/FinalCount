@@ -9,9 +9,12 @@ use App\Models\Article;
 use App\Models\Interview;
 use App\Models\Quote;
 use App\Models\Gallery;
+use App\Models\Person;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class PublicController extends Controller
 {
@@ -45,6 +48,10 @@ class PublicController extends Controller
         $gallery = $this->isModuleActive('gallery')
             ? Gallery::where('status', 'published')->latest()->take(8)->get()
             : collect();
+        $people = Person::where('is_active', true)->whereNotNull('image')
+            ->orderByDesc('is_martyr')
+            ->orderBy('name')
+            ->get();
 
         $activeModules = [
             'news' => $this->isModuleActive('news'),
@@ -56,7 +63,7 @@ class PublicController extends Controller
             'contact' => $this->isModuleActive('contact'),
         ];
 
-        return view('welcome', compact('latestNews', 'featuredNews', 'latestMessages', 'latestSpeech', 'latestMedia', 'quotes', 'gallery', 'activeModules'));
+        return view('welcome', compact('latestNews', 'featuredNews', 'latestMessages', 'latestSpeech', 'latestMedia', 'quotes', 'gallery', 'people', 'activeModules'));
     }
 
     public function setLocale($locale)
@@ -175,6 +182,36 @@ class PublicController extends Controller
         if (!$this->isModuleActive('articles')) abort(404);
         $articles = Article::where('status', 'published')->latest()->paginate(12);
         return view('public.culture', compact('articles'));
+    }
+
+    public function peopleShow(Person $person)
+    {
+        $items = $person->news()
+            ->where('status', 'published')->latest()->get()
+            ->map(fn ($n) => ['type' => 'news', 'item' => $n])
+            ->concat(
+                $person->messages()->where('status', 'published')->latest()->get()
+                    ->map(fn ($m) => ['type' => 'message', 'item' => $m])
+            )
+            ->concat(
+                $person->articles()->where('status', 'published')->latest()->get()
+                    ->map(fn ($a) => ['type' => 'article', 'item' => $a])
+            )
+            ->sortByDesc(fn ($entry) => $entry['item']->published_at?->timestamp ?? $entry['item']->created_at->timestamp)
+            ->values();
+
+        $page = max((int) request()->integer('page', 1), 1);
+        $perPage = 12;
+
+        $items = new LengthAwarePaginator(
+            $items->forPage($page, $perPage),
+            $items->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        return view('public.people-show', compact('person', 'items'));
     }
 
     public function contact()

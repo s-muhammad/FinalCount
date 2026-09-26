@@ -15,9 +15,9 @@ use Throwable;
 
 class RssImportCommand extends Command
 {
-    protected $signature = 'news:import-rss {--sync : Run AI translation synchronously instead of queueing} {--retry-failed : Re-run AI translation for failed or pending imports} {--force : Translate even non-draft (published) news}';
+    protected $signature = 'news:import-rss {--sync : Run AI translation synchronously instead of queueing} {--retry-failed : Re-run AI translation for failed or pending imports} {--force : Re-translate reader items that lack content}';
 
-    protected $description = 'Import news items from active RSS feeds and dispatch AI translation';
+    protected $description = 'Import RSS items into the reader queue and translate them';
 
     public function handle(RssFetcher $fetcher): int
     {
@@ -54,28 +54,32 @@ class RssImportCommand extends Command
             }
 
             foreach ($items as $item) {
-                if (News::where('source_url_hash', sha1($item['link']))->exists()) {
+                $linkHash = sha1($item['link']);
+
+                if (News::where('source_url_hash', $linkHash)->exists()
+                    || RssImport::where('source_url_hash', $linkHash)->exists()) {
                     $totals['skipped']++;
 
                     continue;
                 }
 
                 try {
-                    $news = $this->createNews($feed, $item);
-                    RssImport::create([
+                    $import = RssImport::create([
                         'feed_id' => $feed->id,
-                        'news_id' => $news->id,
                         'source_url' => $item['link'],
+                        'source_url_hash' => $linkHash,
                         'status' => 'pending',
                         'raw_title' => $item['title'],
+                        'raw_body' => $item['description'],
+                        'image' => $this->storeImage($item['image']),
                         'imported_at' => $item['pub_date'] ?? now(),
                     ]);
 
                     if ($this->option('sync')) {
-                        (new AiTranslateNewsJob($news))->handle(app(\App\Services\AiService::class));
+                        (new AiTranslateNewsJob($import))->handle(app(\App\Services\AiService::class));
                         $this->info("  Imported + translated: {$item['title']}");
                     } else {
-                        dispatch(new AiTranslateNewsJob($news));
+                        dispatch(new AiTranslateNewsJob($import));
                         $this->info("  Imported (translation queued): {$item['title']}");
                     }
 
@@ -88,49 +92,24 @@ class RssImportCommand extends Command
         }
 
         $this->newLine();
-        $this->info("Done. Created: {$totals['created']} | Skipped: {$totals['skipped']} | Failed: {$totals['failed']}");
+        $this->info("Done. Imported: {$totals['created']} | Skipped: {$totals['skipped']} | Failed: {$totals['failed']}");
 
         return self::SUCCESS;
     }
 
-    private function createNews(RssFeed $feed, array $item): News
-    {
-        $image = $this->storeImage($item['image']);
-
-        $news = new News;
-        $news->title = $item['title'];
-        $news->summary = Str::limit($item['description'], 250);
-        $news->body = $item['description'];
-        $news->image = $image;
-        $news->slug = $this->uniqueSlug($item['title']);
-        $news->source_url = $item['link'];
-        $news->source_url_hash = sha1($item['link']);
-        $news->status = 'draft';
-        $news->published_at = $item['pub_date'];
-        $news->save();
-
-        return $news;
-    }
-
     private function retryFailed(): int
     {
-        $targets = [];
-
-        foreach (RssImport::whereIn('status', ['failed', 'pending'])
-            ->whereNotNull('news_id')
-            ->get() as $import) {
-            $targets[$import->news_id] = $import->raw_title ?: $import->source_url;
-        }
+        $imports = RssImport::whereIn('status', ['failed', 'pending'])->get();
 
         if ($this->option('force')) {
-            News::where(fn ($q) => $q->whereNull('title_en')->orWhere('title_en', '')->orWhereNull('body_en')->orWhere('body_en', ''))
-                ->get()
-                ->each(function (News $news) use (&$targets) {
-                    $targets[$news->id] = $news->title;
-                });
+            $imports = $imports->merge(
+                RssImport::where('status', 'translated')
+                    ->where(fn ($q) => $q->whereNull('title_en')->orWhere('title_en', ''))
+                    ->get()
+            )->unique('id');
         }
 
-        if ($targets === []) {
+        if ($imports->isEmpty()) {
             $this->warn('No failed, pending, or untranslated imports to process.');
 
             return 0;
@@ -138,19 +117,15 @@ class RssImportCommand extends Command
 
         $count = 0;
 
-        foreach ($targets as $newsId => $label) {
-            $news = News::find($newsId);
-
-            if (! $news) {
-                continue;
-            }
+        foreach ($imports as $import) {
+            $label = $import->raw_title ?: ($import->source_url ?? ('#'.$import->id));
 
             if ($this->option('sync')) {
-                (new AiTranslateNewsJob($news, $this->option('force')))->handle(app(\App\Services\AiService::class));
-                $done = $news->fresh()->title_en ? 'OK' : 'FAILED';
+                (new AiTranslateNewsJob($import))->handle(app(\App\Services\AiService::class));
+                $done = $import->fresh()->title_en ? 'OK' : 'FAILED';
                 $this->info("Processed (sync): {$label} → {$done}");
             } else {
-                dispatch(new AiTranslateNewsJob($news, $this->option('force')));
+                dispatch(new AiTranslateNewsJob($import));
                 $this->info("Queued: {$label}");
             }
 
@@ -160,25 +135,6 @@ class RssImportCommand extends Command
         $this->info("Processed {$count} import(s).");
 
         return $count;
-    }
-
-    private function uniqueSlug(string $title): string
-    {
-        $slug = Str::slug($title);
-
-        if ($slug === '') {
-            $slug = 'news-'.Str::lower(Str::random(6));
-        }
-
-        $base = $slug;
-        $i = 2;
-
-        while (News::where('slug', $slug)->exists()) {
-            $slug = $base.'-'.$i;
-            $i++;
-        }
-
-        return $slug;
     }
 
     private function storeImage(?string $url): ?string

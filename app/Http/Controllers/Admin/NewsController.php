@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\News;
+use App\Models\Person;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -18,7 +19,9 @@ class NewsController extends Controller
 
     public function create()
     {
-        return view('admin.news.create');
+        $people = Person::orderBy('name')->get();
+
+        return view('admin.news.create', compact('people'));
     }
 
     public function store(Request $request)
@@ -37,15 +40,21 @@ class NewsController extends Controller
             'is_featured' => 'boolean',
             'status' => 'required|in:draft,published,archived',
             'published_at' => 'nullable|date',
+            'people_ids' => 'nullable|array',
+            'people_ids.*' => 'integer|exists:people,id',
         ]);
 
         $validated['slug'] = Str::slug($request->title);
+        $validated['is_featured'] = $request->boolean('is_featured');
+
+        unset($validated['people_ids']);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('news', 'public');
         }
 
-        News::create($validated);
+        $news = News::create($validated);
+        $news->people()->sync($request->input('people_ids', []));
 
         return redirect()->route('admin.news.index')->with('success', 'خبر با موفقیت ایجاد شد');
     }
@@ -57,7 +66,10 @@ class NewsController extends Controller
 
     public function edit(News $news)
     {
-        return view('admin.news.edit', compact('news'));
+        $people = Person::orderBy('name')->get();
+        $selectedPeople = $news->people;
+
+        return view('admin.news.edit', compact('news', 'people', 'selectedPeople'));
     }
 
     public function update(Request $request, News $news)
@@ -76,15 +88,21 @@ class NewsController extends Controller
             'is_featured' => 'boolean',
             'status' => 'required|in:draft,published,archived',
             'published_at' => 'nullable|date',
+            'people_ids' => 'nullable|array',
+            'people_ids.*' => 'integer|exists:people,id',
         ]);
 
         $validated['slug'] = Str::slug($request->title);
+        $validated['is_featured'] = $request->boolean('is_featured');
+
+        unset($validated['people_ids']);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('news', 'public');
         }
 
         $news->update($validated);
+        $news->people()->sync($request->input('people_ids', []));
 
         return redirect()->route('admin.news.index')->with('success', 'خبر با موفقیت بروزرسانی شد');
     }

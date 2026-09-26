@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
+use App\Models\Person;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -18,7 +19,9 @@ class ArticleController extends Controller
 
     public function create()
     {
-        return view('admin.articles.create');
+        $people = Person::orderBy('name')->get();
+
+        return view('admin.articles.create', compact('people'));
     }
 
     public function store(Request $request)
@@ -38,15 +41,20 @@ class ArticleController extends Controller
             'author' => 'nullable|string|max:255',
             'status' => 'required|in:draft,published,archived',
             'published_at' => 'nullable|date',
+            'people_ids' => 'nullable|array',
+            'people_ids.*' => 'integer|exists:people,id',
         ]);
 
         $validated['slug'] = Str::slug($request->title);
+
+        unset($validated['people_ids']);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('articles', 'public');
         }
 
-        Article::create($validated);
+        $article = Article::create($validated);
+        $article->people()->sync($request->input('people_ids', []));
 
         return redirect()->route('admin.articles.index')->with('success', 'مقاله با موفقیت ایجاد شد');
     }
@@ -58,7 +66,10 @@ class ArticleController extends Controller
 
     public function edit(Article $article)
     {
-        return view('admin.articles.edit', compact('article'));
+        $people = Person::orderBy('name')->get();
+        $selectedPeople = $article->people;
+
+        return view('admin.articles.edit', compact('article', 'people', 'selectedPeople'));
     }
 
     public function update(Request $request, Article $article)
@@ -78,15 +89,20 @@ class ArticleController extends Controller
             'author' => 'nullable|string|max:255',
             'status' => 'required|in:draft,published,archived',
             'published_at' => 'nullable|date',
+            'people_ids' => 'nullable|array',
+            'people_ids.*' => 'integer|exists:people,id',
         ]);
 
         $validated['slug'] = Str::slug($request->title);
+
+        unset($validated['people_ids']);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('articles', 'public');
         }
 
         $article->update($validated);
+        $article->people()->sync($request->input('people_ids', []));
 
         return redirect()->route('admin.articles.index')->with('success', 'مقاله با موفقیت بروزرسانی شد');
     }

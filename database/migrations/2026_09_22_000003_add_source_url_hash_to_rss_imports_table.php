@@ -27,6 +27,27 @@ return new class extends Migration
                 }
             });
 
+        $duplicateHashes = DB::table('rss_imports')
+            ->select('source_url_hash')
+            ->whereNotNull('source_url_hash')
+            ->groupBy('source_url_hash')
+            ->havingRaw('COUNT(*) > 1')
+            ->pluck('source_url_hash');
+
+        foreach ($duplicateHashes as $hash) {
+            $rows = DB::table('rss_imports')
+                ->where('source_url_hash', $hash)
+                ->get(['id', 'news_id']);
+
+            $keep = $rows->firstWhere('news_id') ?? $rows->first();
+
+            foreach ($rows as $row) {
+                if ($row->id !== $keep->id) {
+                    DB::table('rss_imports')->where('id', $row->id)->delete();
+                }
+            }
+        }
+
         if (! Schema::hasIndex('rss_imports', ['source_url_hash'])) {
             Schema::table('rss_imports', function (Blueprint $table) {
                 $table->unique('source_url_hash');

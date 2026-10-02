@@ -11,10 +11,35 @@ class AiService
     {
         $provider = strtolower(config('services.ai.provider'));
 
+        return $this->byProvider(
+            $this->buildPrompt($title, $summary, $body),
+            $title,
+            $summary,
+            $body,
+        );
+    }
+
+    public function translateOnly(string $title, string $summary, string $body): array
+    {
+        $provider = strtolower(config('services.ai.provider'));
+
+        return $this->byProvider(
+            $this->buildTranslatePrompt($title, $summary, $body),
+            $title,
+            $summary,
+            $body,
+        );
+    }
+
+    private function byProvider(string $prompt, string $title, string $summary, string $body): array
+    {
+        $provider = strtolower(config('services.ai.provider'));
+
         return match ($provider) {
-            'gemini' => $this->translateWithGemini($title, $summary, $body),
+            'gemini' => $this->translateWithGemini($prompt, $title, $summary, $body),
             'mistral', 'deepseek', 'qwen', 'gapgpt' => $this->translateWithOpenAiCompatible(
                 config("services.{$provider}"),
+                $prompt,
                 $title,
                 $summary,
                 $body,
@@ -23,7 +48,7 @@ class AiService
         };
     }
 
-    private function translateWithGemini(string $title, string $summary, string $body): array
+    private function translateWithGemini(string $prompt, string $title, string $summary, string $body): array
     {
         $config = config('services.gemini');
 
@@ -37,7 +62,7 @@ class AiService
                 ->withQueryParameters(['key' => $config['key']])
                 ->post('https://generativelanguage.googleapis.com/v1beta/models/'.($config['model'] ?? 'gemini-1.5-flash').':generateContent', [
                     'contents' => [
-                        ['parts' => [['text' => $this->buildPrompt($title, $summary, $body)]]],
+                        ['parts' => [['text' => $prompt]]],
                     ],
                     'generationConfig' => [
                         'temperature' => 0.4,
@@ -67,7 +92,7 @@ class AiService
         return $this->normalize($this->decodeJson($text), $title, $summary, $body);
     }
 
-    private function translateWithOpenAiCompatible(array $config, string $title, string $summary, string $body): array
+    private function translateWithOpenAiCompatible(array $config, string $prompt, string $title, string $summary, string $body): array
     {
         if (blank($config['key'])) {
             throw new \RuntimeException('Neither AI_PROVIDER key is configured for "'.config('services.ai.provider').'". Set the matching *_API_KEY in your .env file.');
@@ -83,7 +108,7 @@ class AiService
                     'response_format' => ['type' => 'json_object'],
                     'messages' => [
                         ['role' => 'system', 'content' => 'You only respond with valid JSON, no markdown, no extra text.'],
-                        ['role' => 'user', 'content' => $this->buildPrompt($title, $summary, $body)],
+                        ['role' => 'user', 'content' => $prompt],
                     ],
                 ]);
 
@@ -107,6 +132,36 @@ class AiService
         }
 
         return $this->normalize($this->decodeJson($text), $title, $summary, $body);
+    }
+
+    private function buildTranslatePrompt(string $title, string $summary, string $body): string
+    {
+        return <<<PROMPT
+You are a professional translator for a news agency. Translate the supplied news item faithfully into Arabic (ar) and English (en).
+
+Rules:
+- DO NOT rewrite, expand, shorten, summarize or "improve" the content. Keep the original meaning, tone, facts, names and structure exactly.
+- Translate the title verbatim (natural idiomatic adjustment only).
+- Translate the summary verbatim.
+- Translate the full body paragraph by paragraph, preserving paragraph breaks and any existing markers (## headings, - bullets, > quotes if present).
+- Do not add analysis, context, drop facts, or make any SEO changes.
+- For "fa" output the EXACT original text unmodified (copy it verbatim).
+- Respond with ONLY valid JSON, no markdown:
+{
+  "fa": {"title": "EXACT ORIGINAL TITLE", "summary": "EXACT ORIGINAL SUMMARY", "body": "EXACT ORIGINAL BODY"},
+  "ar": {"title": "...", "summary": "...", "body": "..."},
+  "en": {"title": "...", "summary": "...", "body": "..."}
+}
+
+RAW TITLE:
+{$title}
+
+RAW SUMMARY:
+{$summary}
+
+RAW BODY:
+{$body}
+PROMPT;
     }
 
     private function shouldRetry(int $status): bool

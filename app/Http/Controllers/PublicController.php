@@ -184,6 +184,17 @@ class PublicController extends Controller
         return view('public.culture', compact('articles'));
     }
 
+    public function cultureShow(Article $article)
+    {
+        if (!$this->isModuleActive('articles')) abort(404);
+        if ($article->status !== 'published') abort(404);
+        $related = Article::where('status', 'published')
+            ->where('id', '!=', $article->id)
+            ->latest()->take(4)->get();
+        $quotes = Quote::where('is_active', true)->inRandomOrder()->take(3)->get();
+        return view('public.culture-show', compact('article', 'related', 'quotes'));
+    }
+
     public function peopleShow(Person $person)
     {
         $items = $person->news()

@@ -18,7 +18,10 @@ class AiTranslateNewsJob implements ShouldQueue
 
     public $tries = 1;
 
-    public function __construct(public RssImport $rssImport) {}
+    public function __construct(
+        public RssImport $rssImport,
+        public string $mode = 'seo',
+    ) {}
 
     public function handle(AiService $ai): void
     {
@@ -35,30 +38,35 @@ class AiTranslateNewsJob implements ShouldQueue
             return;
         }
 
+        $translateOnly = $this->mode === 'translate';
+
         try {
             $rawTitle = $this->rssImport->raw_title ?? '';
             $rawBody = $this->rssImport->raw_body ?? '';
 
-            $result = $ai->translateAndSeo(
-                $rawTitle,
-                Str::limit($rawBody, 250),
-                $rawBody,
-            );
+            $result = $translateOnly
+                ? $ai->translateOnly($rawTitle, Str::limit($rawBody, 250), $rawBody)
+                : $ai->translateAndSeo($rawTitle, Str::limit($rawBody, 250), $rawBody);
 
-            $this->rssImport->update([
-                'title' => $result['fa']['title'] ?: $rawTitle,
-                'summary' => $result['fa']['summary'] ?: Str::limit($rawBody, 250),
-                'body' => $result['fa']['body'] ?: $rawBody,
+            $data = [
+                'title' => $translateOnly ? $rawTitle : ($result['fa']['title'] ?: $rawTitle),
+                'summary' => $translateOnly ? Str::limit($rawBody, 250) : ($result['fa']['summary'] ?: Str::limit($rawBody, 250)),
+                'body' => $translateOnly ? $rawBody : ($result['fa']['body'] ?: $rawBody),
                 'title_ar' => $result['ar']['title'] ?: $rawTitle,
                 'summary_ar' => $result['ar']['summary'] ?: Str::limit($rawBody, 250),
                 'body_ar' => $result['ar']['body'] ?: $rawBody,
                 'title_en' => $result['en']['title'] ?: $rawTitle,
                 'summary_en' => $result['en']['summary'] ?: Str::limit($rawBody, 250),
                 'body_en' => $result['en']['body'] ?: $rawBody,
-                'keywords' => implode(', ', $result['keywords']),
                 'status' => 'translated',
                 'error' => null,
-            ]);
+            ];
+
+            if (! $translateOnly) {
+                $data['keywords'] = implode(', ', $result['keywords']);
+            }
+
+            $this->rssImport->update($data);
         } catch (Throwable $e) {
             $this->rssImport->update([
                 'status' => 'failed',

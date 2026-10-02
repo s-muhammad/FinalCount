@@ -77,6 +77,8 @@ return [
     'selected_quotes' => 'نقل‌قول‌های منتخب',
     'no_articles_available' => 'مقاله‌ای موجود نیست',
     'no_quotes_available' => 'نقل‌قولی موجود نیست',
+    'related_articles' => 'مقالات مرتبط',
+    'back_to_culture' => 'بازگشت به صفحه فرهنگ',
     
     // Contact Page
     'contact_list' => 'ارتباط با ما',

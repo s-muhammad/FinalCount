@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\AiTranslateNewsJob;
 use App\Models\News;
 use App\Models\RssFeed;
 use App\Models\RssImport;
 use App\Services\RssFetcher;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -15,15 +15,13 @@ use Throwable;
 
 class RssImportCommand extends Command
 {
-    protected $signature = 'news:import-rss {--sync : Run AI translation synchronously instead of queueing} {--retry-failed : Re-run AI translation for failed or pending imports} {--force : Re-translate reader items that lack content}';
+    protected $signature = 'news:import-rss';
 
-    protected $description = 'Import RSS items into the reader queue and translate them';
+    protected $description = "Import today's RSS items into the reader queue (raw, no AI)";
 
     public function handle(RssFetcher $fetcher): int
     {
-        if ($this->option('retry-failed')) {
-            $this->retryFailed();
-        }
+        $this->purgeOldImports();
 
         $feeds = RssFeed::where('is_active', true)->get();
 
@@ -33,7 +31,7 @@ class RssImportCommand extends Command
             return self::SUCCESS;
         }
 
-        $totals = ['created' => 0, 'skipped' => 0, 'failed' => 0];
+        $totals = ['created' => 0, 'skipped' => 0, 'old' => 0, 'failed' => 0];
 
         foreach ($feeds as $feed) {
             $this->line("Processing feed [{$feed->name}] ({$feed->url})");
@@ -54,6 +52,14 @@ class RssImportCommand extends Command
             }
 
             foreach ($items as $item) {
+                $pubDate = $item['pub_date'] ? Carbon::parse($item['pub_date']) : null;
+
+                if ($pubDate && $pubDate->lt(now()->subHours(24))) {
+                    $totals['old']++;
+
+                    continue;
+                }
+
                 $linkHash = sha1($item['link']);
 
                 if (News::where('source_url_hash', $linkHash)->exists()
@@ -64,7 +70,7 @@ class RssImportCommand extends Command
                 }
 
                 try {
-                    $import = RssImport::create([
+                    RssImport::create([
                         'feed_id' => $feed->id,
                         'source_url' => $item['link'],
                         'source_url_hash' => $linkHash,
@@ -75,13 +81,7 @@ class RssImportCommand extends Command
                         'imported_at' => $item['pub_date'] ?? now(),
                     ]);
 
-                    if ($this->option('sync')) {
-                        (new AiTranslateNewsJob($import))->handle(app(\App\Services\AiService::class));
-                        $this->info("  Imported + translated: {$item['title']}");
-                    } else {
-                        dispatch(new AiTranslateNewsJob($import));
-                        $this->info("  Imported (translation queued): {$item['title']}");
-                    }
+                    $this->info("  Imported: {$item['title']}");
 
                     $totals['created']++;
                 } catch (Throwable $e) {
@@ -92,49 +92,21 @@ class RssImportCommand extends Command
         }
 
         $this->newLine();
-        $this->info("Done. Imported: {$totals['created']} | Skipped: {$totals['skipped']} | Failed: {$totals['failed']}");
+        $this->info("Done. Imported: {$totals['created']} | Skipped (already seen): {$totals['skipped']} | Old (not today): {$totals['old']} | Failed: {$totals['failed']}");
 
         return self::SUCCESS;
     }
 
-    private function retryFailed(): int
+    private function purgeOldImports(): void
     {
-        $imports = RssImport::whereIn('status', ['failed', 'pending'])->get();
+        $deleted = RssImport::where('created_at', '<', now()->subHours(24))
+            ->whereNull('published_as')
+            ->where('status', '!=', 'ignored')
+            ->delete();
 
-        if ($this->option('force')) {
-            $imports = $imports->merge(
-                RssImport::where('status', 'translated')
-                    ->where(fn ($q) => $q->whereNull('title_en')->orWhere('title_en', ''))
-                    ->get()
-            )->unique('id');
+        if ($deleted > 0) {
+            $this->info("Purged {$deleted} old reader item(s) (older than 24h).");
         }
-
-        if ($imports->isEmpty()) {
-            $this->warn('No failed, pending, or untranslated imports to process.');
-
-            return 0;
-        }
-
-        $count = 0;
-
-        foreach ($imports as $import) {
-            $label = $import->raw_title ?: ($import->source_url ?? ('#'.$import->id));
-
-            if ($this->option('sync')) {
-                (new AiTranslateNewsJob($import))->handle(app(\App\Services\AiService::class));
-                $done = $import->fresh()->title_en ? 'OK' : 'FAILED';
-                $this->info("Processed (sync): {$label} → {$done}");
-            } else {
-                dispatch(new AiTranslateNewsJob($import));
-                $this->info("Queued: {$label}");
-            }
-
-            $count++;
-        }
-
-        $this->info("Processed {$count} import(s).");
-
-        return $count;
     }
 
     private function storeImage(?string $url): ?string

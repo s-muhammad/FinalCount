@@ -78,6 +78,11 @@
                                 <div class="min-w-0">
                                     <div class="text-sm font-medium text-gray-800 max-w-xs truncate">{{ $import->raw_title ?: $import->title }}</div>
                                     <div class="text-xs text-gray-400 mt-0.5">{{ $import->feed?->name ?? '-' }}</div>
+                                    @if($import->source_url)
+                                        <a href="{{ $import->source_url }}" target="_blank" rel="noopener"
+                                           class="text-xs text-blue-600 hover:underline max-w-xs truncate block" dir="ltr"
+                                           title="{{ $import->source_url }}">{{ $import->source_url }}</a>
+                                    @endif
                                     @if($import->keywords)
                                         <div class="text-xs text-gray-400 mt-0.5 max-w-xs truncate" dir="ltr">{{ $import->keywords }}</div>
                                     @endif
@@ -102,6 +107,23 @@
                                 @endif
                             @else
                                 <div class="flex flex-wrap items-center gap-2">
+                                    @if(!$import->title_en)
+                                        <form action="{{ route('admin.rss.translate', $import) }}" method="POST"
+                                              onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').textContent = 'در حال ترجمه...';">
+                                            @csrf
+                                            <input type="hidden" name="mode" value="translate">
+                                            <button type="submit" class="px-3 py-1.5 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg text-xs hover:bg-sky-100">فقط ترجمه</button>
+                                        </form>
+                                        <form action="{{ route('admin.rss.translate', $import) }}" method="POST"
+                                              onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').textContent = 'در حال ترجمه...';">
+                                            @csrf
+                                            <input type="hidden" name="mode" value="seo">
+                                            <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700">ترجمه + سئو</button>
+                                        </form>
+                                    @else
+                                        <span class="px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs">ترجمه شده ✓</span>
+                                    @endif
+
                                     <form action="{{ route('admin.rss.convert', $import) }}" method="POST" class="flex items-center gap-1">
                                         @csrf
                                         <select name="type" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-primary">
@@ -112,7 +134,7 @@
                                             <option value="quote">انتشار به نقل‌قول</option>
                                             <option value="gallery">انتشار به گالری</option>
                                         </select>
-                                        <button type="submit" class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs hover:bg-green-700">انتشار</button>
+                                        <button type="submit" class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs hover:bg-green-700">ارسال به AI و انتشار</button>
                                     </form>
 
                                     <form action="{{ route('admin.rss.reject', $import) }}" method="POST" onsubmit="return confirm('این مورد حذف شود و دیگر ایمپورت نشود؟')">
@@ -121,7 +143,7 @@
                                     </form>
 
                                     @if(!$import->title_en)
-                                        <span class="text-xs text-gray-400">(ترجمه نشده — ابتدا «اجرای ایمپورت»)</span>
+                                        <span class="text-xs text-gray-400">(هنوز ترجمه نشده — «فقط ترجمه» محتوا را دستنخورده می‌گذارد، «ترجمه + سئو» بازنویسی و بهینه می‌کند)</span>
                                     @endif
                                 </div>
                             @endif

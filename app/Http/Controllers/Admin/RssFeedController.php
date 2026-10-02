@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\AiTranslateNewsJob;
 use App\Models\Article;
 use App\Models\Gallery;
 use App\Models\Interview;
@@ -11,6 +12,7 @@ use App\Models\News;
 use App\Models\Quote;
 use App\Models\RssFeed;
 use App\Models\RssImport;
+use App\Services\AiService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -89,7 +91,7 @@ class RssFeedController extends Controller
     public function runNow(): RedirectResponse
     {
         try {
-            $exit = \Illuminate\Support\Facades\Artisan::call('news:import-rss', ['--sync' => true, '--retry-failed' => true, '--force' => true]);
+            $exit = \Illuminate\Support\Facades\Artisan::call('news:import-rss');
             $output = \Illuminate\Support\Facades\Artisan::output();
 
             $message = $exit === 0
@@ -100,6 +102,36 @@ class RssFeedController extends Controller
         } catch (\Throwable $e) {
             return redirect()->back()->withErrors([$e->getMessage()]);
         }
+    }
+
+    public function translate(Request $request, RssImport $rssImport): RedirectResponse
+    {
+        if ($rssImport->status === 'ignored') {
+            return redirect()->back()->withErrors(['این مورد از گردونه حذف شده است.']);
+        }
+
+        if ($rssImport->published_as) {
+            return redirect()->back()->withErrors(['این مورد قبلاً منتشر شده است.']);
+        }
+
+        if ($rssImport->title_en) {
+            return redirect()->back()->with('success', 'این مورد قبلاً به هوش مصنوعی ارسال شده است.');
+        }
+
+        $mode = $request->input('mode', 'seo') === 'translate' ? 'translate' : 'seo';
+
+        (new AiTranslateNewsJob($rssImport, $mode))->handle(app(AiService::class));
+        $rssImport->refresh();
+
+        if (! $rssImport->title_en) {
+            return redirect()->back()->withErrors(['ترجمه ناموفق بود؛ دوباره تلاش کنید.']);
+        }
+
+        $message = $mode === 'translate'
+            ? 'فقط ترجمه انجام شد؛ محتوای اصلی حفظ شد. حالا می‌توانید آن را منتشر کنید.'
+            : 'ترجمه و سئو انجام شد؛ حالا می‌توانید آن را منتشر کنید.';
+
+        return redirect()->back()->with('success', $message);
     }
 
     public function toggleStatus(RssImport $rssImport): RedirectResponse
@@ -162,7 +194,12 @@ class RssFeedController extends Controller
         }
 
         if (! $rssImport->title || ! $rssImport->title_en || ! $rssImport->body) {
-            return redirect()->back()->withErrors(['ترجمه این مورد هنوز کامل نشده است؛ اول «اجرای ایمپورت» را بزنید.']);
+            (new AiTranslateNewsJob($rssImport))->handle(app(AiService::class));
+            $rssImport->refresh();
+
+            if (! $rssImport->title || ! $rssImport->title_en || ! $rssImport->body) {
+                return redirect()->back()->withErrors(['ترجمهٔ هوش مصنوعی ناموفق بود؛ دوباره تلاش کنید.']);
+            }
         }
 
         $image = $this->copyImage($rssImport);

@@ -13,7 +13,7 @@
         @if($articles->count())
             <div class="space-y-6">
                 @foreach($articles as $item)
-                    <article class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition">
+                    <a href="{{ route('public.culture.show', $item) }}" class="block bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition">
                         <div class="flex flex-col sm:flex-row">
                             @if($item->image)
                                 <img src="{{ Storage::url($item->image) }}" class="w-full sm:w-48 h-48 object-cover" alt="{{ localize($item, 'title') }}">
@@ -24,7 +24,7 @@
                                         <span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">{{ $item->category }}</span>
                                     @endif
                                 </div>
-                                <h2 class="font-bold text-gray-800 mb-2 line-clamp-2">{{ localize($item, 'title') }}</h2>
+                                <h2 class="font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-primary transition">{{ localize($item, 'title') }}</h2>
                                 <p class="text-gray-600 text-sm line-clamp-2 mb-3">{{ localize($item, 'summary') }}</p>
                                 <div class="flex items-center justify-between text-xs text-gray-500">
                                     <span>{{ $item->author }}</span>
@@ -32,7 +32,7 @@
                                 </div>
                             </div>
                         </div>
-                    </article>
+                    </a>
                 @endforeach
             </div>
 

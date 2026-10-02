@@ -26,6 +26,11 @@ class Article extends Model
         return $this->morphToMany(Person::class, 'personable');
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     public function translatable(): array
     {
         return ['title', 'summary', 'body'];

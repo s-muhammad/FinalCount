@@ -77,6 +77,8 @@ return [
     'selected_quotes' => 'الاقتباسات المميزة',
     'no_articles_available' => 'لا توجد مقالات',
     'no_quotes_available' => 'لا توجد اقتباسات',
+    'related_articles' => 'مقالات ذات صلة',
+    'back_to_culture' => 'العودة إلى صفحة الثقافة',
     
     // Contact Page
     'contact_list' => 'اتصل بنا',

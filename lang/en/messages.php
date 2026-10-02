@@ -77,6 +77,8 @@ return [
     'selected_quotes' => 'Selected Quotes',
     'no_articles_available' => 'No articles available',
     'no_quotes_available' => 'No quotes available',
+    'related_articles' => 'Related Articles',
+    'back_to_culture' => 'Back to Culture Page',
     
     // Contact Page
     'contact_list' => 'Contact Us',

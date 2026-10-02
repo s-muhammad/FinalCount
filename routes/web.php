@@ -28,6 +28,7 @@ Route::get('/messages/{message}', [PublicController::class, 'messageShow'])->nam
 Route::get('/media', [PublicController::class, 'media'])->name('public.media');
 Route::get('/media/{medium}', [PublicController::class, 'mediaShow'])->name('public.media.show');
 Route::get('/culture', [PublicController::class, 'culture'])->name('public.culture');
+Route::get('/culture/{article}', [PublicController::class, 'cultureShow'])->name('public.culture.show');
 Route::get('/people/{person}', [PublicController::class, 'peopleShow'])->name('public.people.show');
 Route::get('/contact', [PublicController::class, 'contact'])->name('public.contact');
 Route::post('/contact', [PublicController::class, 'contactStore'])->name('public.contact.store');
@@ -57,6 +58,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('rss/logs', [RssFeedController::class, 'logs'])->name('rss.logs');
     Route::post('rss/run', [RssFeedController::class, 'runNow'])->name('rss.run');
     Route::post('rss/{rssImport}/reject', [RssFeedController::class, 'reject'])->name('rss.reject');
+    Route::post('rss/{rssImport}/translate', [RssFeedController::class, 'translate'])->name('rss.translate');
     Route::post('rss/{rssImport}/convert', [RssFeedController::class, 'convert'])->name('rss.convert');
 });
 

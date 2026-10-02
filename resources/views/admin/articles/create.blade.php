@@ -31,7 +31,7 @@
                 <div class="space-y-4" x-show="lang === 'ar'" dir="rtl">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">العنوان</label>
-                        <input type="text" name="title_ar" value="{{ old('title_ar') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary" required>
+                        <input type="text" name="title_ar" value="{{ old('title_ar') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">الملخص</label>
@@ -45,7 +45,7 @@
                 <div class="space-y-4" x-show="lang === 'en'" dir="ltr">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                        <input type="text" name="title_en" value="{{ old('title_en') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary" required>
+                        <input type="text" name="title_en" value="{{ old('title_en') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Summary</label>

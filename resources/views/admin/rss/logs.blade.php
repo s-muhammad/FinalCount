@@ -107,34 +107,17 @@
                                 @endif
                             @else
                                 <div class="flex flex-wrap items-center gap-2">
-                                    @if(!$import->title_en)
-                                        <form action="{{ route('admin.rss.translate', $import) }}" method="POST"
-                                              onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').textContent = 'در حال ترجمه...';">
-                                            @csrf
-                                            <input type="hidden" name="mode" value="translate">
-                                            <button type="submit" class="px-3 py-1.5 bg-sky-50 text-sky-700 border border-sky-200 rounded-lg text-xs hover:bg-sky-100">فقط ترجمه</button>
-                                        </form>
-                                        <form action="{{ route('admin.rss.translate', $import) }}" method="POST"
-                                              onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').textContent = 'در حال ترجمه...';">
-                                            @csrf
-                                            <input type="hidden" name="mode" value="seo">
-                                            <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700">ترجمه + سئو</button>
-                                        </form>
-                                    @else
-                                        <span class="px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs">ترجمه شده ✓</span>
-                                    @endif
-
                                     <form action="{{ route('admin.rss.convert', $import) }}" method="POST" class="flex items-center gap-1">
                                         @csrf
                                         <select name="type" class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-primary">
-                                            <option value="news">انتشار به اخبار</option>
-                                            <option value="message">انتشار به پیام</option>
-                                            <option value="article">انتشار به مقاله</option>
-                                            <option value="interview">انتشار به گفت‌وگو</option>
-                                            <option value="quote">انتشار به نقل‌قول</option>
-                                            <option value="gallery">انتشار به گالری</option>
+                                            <option value="news">انتقال به اخبار</option>
+                                            <option value="message">انتقال به پیام</option>
+                                            <option value="article">انتقال به مقاله</option>
+                                            <option value="interview">انتقال به گفت‌وگو</option>
+                                            <option value="quote">انتقال به نقل‌قول</option>
+                                            <option value="gallery">انتقال به گالری</option>
                                         </select>
-                                        <button type="submit" class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs hover:bg-green-700">ارسال به AI و انتشار</button>
+                                        <button type="submit" class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs hover:bg-green-700">ارسال به پیش‌نویس</button>
                                     </form>
 
                                     <form action="{{ route('admin.rss.reject', $import) }}" method="POST" onsubmit="return confirm('این مورد حذف شود و دیگر ایمپورت نشود؟')">
@@ -143,7 +126,9 @@
                                     </form>
 
                                     @if(!$import->title_en)
-                                        <span class="text-xs text-gray-400">(هنوز ترجمه نشده — «فقط ترجمه» محتوا را دستنخورده می‌گذارد، «ترجمه + سئو» بازنویسی و بهینه می‌کند)</span>
+                                        <span class="text-xs text-gray-400">(ترجمه در صفحهٔ ویرایش خبر انجام می‌شود)</span>
+                                    @else
+                                        <span class="px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs">ترجمه شده ✓</span>
                                     @endif
                                 </div>
                             @endif

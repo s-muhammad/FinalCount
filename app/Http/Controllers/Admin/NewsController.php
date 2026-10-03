@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\News;
 use App\Models\Person;
+use App\Services\ContentTranslator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -115,5 +116,22 @@ class NewsController extends Controller
 
         $news->delete();
         return redirect()->route('admin.news.index')->with('success', 'خبر با موفقیت حذف شد');
+    }
+
+    public function translate(Request $request, News $news)
+    {
+        $mode = $request->input('mode') === 'translate' ? 'translate' : 'seo';
+
+        try {
+            app(ContentTranslator::class)->translate($news, $mode, $news->source_url);
+        } catch (\Throwable $e) {
+            return redirect()->back()->withErrors(['ترجمه ناموفق بود: '.$e->getMessage()]);
+        }
+
+        $message = $mode === 'translate'
+            ? 'فقط ترجمه انجام شد؛ محتوای فارسی حفظ شد.'
+            : 'ترجمه و سئو انجام شد؛ هر سه زبان به‌روزرسانی شدند.';
+
+        return redirect()->back()->with('success', $message);
     }
 }

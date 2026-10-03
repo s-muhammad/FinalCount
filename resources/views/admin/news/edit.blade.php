@@ -101,4 +101,26 @@
         </div>
     </div>
 </form>
+
+<div class="bg-white rounded-xl shadow-sm p-6 mt-6 border border-blue-100">
+    <h3 class="font-bold text-gray-800 mb-1 flex items-center gap-2">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+        ترجمه با هوش مصنوعی
+    </h3>
+    <p class="text-xs text-gray-500 mb-4 leading-relaxed">
+        اگر متن خبر کوتاه باشد، متن کامل از صفحهٔ منبع دریافت می‌شود؛ سپس نسخهٔ عربی و انگلیسی تولید می‌شود. در حالت «ترجمه + سئو» متن فارسی هم بازنویسی و بهینه می‌شود.
+    </p>
+    <form action="{{ route('admin.news.translate', $news) }}" method="POST"
+          onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').textContent = 'در حال ترجمه...';">
+        @csrf
+        <div class="flex flex-wrap items-center gap-2">
+            <select name="mode" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary">
+                <option value="seo">ترجمه + سئو (بازنویسی هر سه زبان)</option>
+                <option value="translate">فقط ترجمه (حفظ محتوای فارسی)</option>
+            </select>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">اجرای ترجمه و سئو</button>
+        </div>
+        <p class="text-xs text-red-500 mt-3">توجه: اجرای ترجمه، فیلدهای عربی/انگلیسی و در حالت سئو، متن فارسی را بازنویسی می‌کند و ویرایش‌های دستی جایگزین می‌شوند.</p>
+    </form>
+</div>
 @endsection

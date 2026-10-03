@@ -68,4 +68,10 @@ return [
         'base_url' => 'https://dashscope.aliyuncs.com/compatible-mode/v1',
     ],
 
+    'avalai' => [
+        'key' => env('AVALAI_API_KEY'),
+        'model' => env('AVALAI_MODEL', 'gpt-6-luna'),
+        'base_url' => 'https://api.avalai.ir/v1',
+    ],
+
 ];

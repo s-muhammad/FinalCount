@@ -37,7 +37,7 @@ class AiService
 
         return match ($provider) {
             'gemini' => $this->translateWithGemini($prompt, $title, $summary, $body),
-            'mistral', 'deepseek', 'qwen', 'gapgpt' => $this->translateWithOpenAiCompatible(
+            'mistral', 'deepseek', 'qwen', 'gapgpt', 'avalai' => $this->translateWithOpenAiCompatible(
                 config("services.{$provider}"),
                 $prompt,
                 $title,

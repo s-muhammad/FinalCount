@@ -40,6 +40,7 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('news', NewsController::class);
+    Route::post('news/{news}/translate', [NewsController::class, 'translate'])->name('news.translate');
     Route::resource('messages', MessageController::class);
     Route::resource('media', MediaController::class);
     Route::resource('articles', ArticleController::class);
@@ -58,7 +59,6 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('rss/logs', [RssFeedController::class, 'logs'])->name('rss.logs');
     Route::post('rss/run', [RssFeedController::class, 'runNow'])->name('rss.run');
     Route::post('rss/{rssImport}/reject', [RssFeedController::class, 'reject'])->name('rss.reject');
-    Route::post('rss/{rssImport}/translate', [RssFeedController::class, 'translate'])->name('rss.translate');
     Route::post('rss/{rssImport}/convert', [RssFeedController::class, 'convert'])->name('rss.convert');
 });
 

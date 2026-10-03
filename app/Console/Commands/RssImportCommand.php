@@ -70,13 +70,19 @@ class RssImportCommand extends Command
                 }
 
                 try {
+                    // Prefer the full article text (content:encoded); fall back
+                    // to the short description snippet when it is not provided.
+                    $rawBody = ($item['full_body'] ?? '') !== ''
+                        ? mb_substr($item['full_body'], 0, 12000)
+                        : $item['description'];
+
                     RssImport::create([
                         'feed_id' => $feed->id,
                         'source_url' => $item['link'],
                         'source_url_hash' => $linkHash,
                         'status' => 'pending',
                         'raw_title' => $item['title'],
-                        'raw_body' => $item['description'],
+                        'raw_body' => $rawBody,
                         'image' => $this->storeImage($item['image']),
                         'imported_at' => $item['pub_date'] ?? now(),
                     ]);

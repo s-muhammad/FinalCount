@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\AiTranslateNewsJob;
 use App\Models\Article;
 use App\Models\Gallery;
 use App\Models\Interview;
@@ -12,7 +11,7 @@ use App\Models\News;
 use App\Models\Quote;
 use App\Models\RssFeed;
 use App\Models\RssImport;
-use App\Services\AiService;
+use App\Services\ArticleBodyExtractor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -104,36 +103,6 @@ class RssFeedController extends Controller
         }
     }
 
-    public function translate(Request $request, RssImport $rssImport): RedirectResponse
-    {
-        if ($rssImport->status === 'ignored') {
-            return redirect()->back()->withErrors(['این مورد از گردونه حذف شده است.']);
-        }
-
-        if ($rssImport->published_as) {
-            return redirect()->back()->withErrors(['این مورد قبلاً منتشر شده است.']);
-        }
-
-        if ($rssImport->title_en) {
-            return redirect()->back()->with('success', 'این مورد قبلاً به هوش مصنوعی ارسال شده است.');
-        }
-
-        $mode = $request->input('mode', 'seo') === 'translate' ? 'translate' : 'seo';
-
-        (new AiTranslateNewsJob($rssImport, $mode))->handle(app(AiService::class));
-        $rssImport->refresh();
-
-        if (! $rssImport->title_en) {
-            return redirect()->back()->withErrors(['ترجمه ناموفق بود؛ دوباره تلاش کنید.']);
-        }
-
-        $message = $mode === 'translate'
-            ? 'فقط ترجمه انجام شد؛ محتوای اصلی حفظ شد. حالا می‌توانید آن را منتشر کنید.'
-            : 'ترجمه و سئو انجام شد؛ حالا می‌توانید آن را منتشر کنید.';
-
-        return redirect()->back()->with('success', $message);
-    }
-
     public function toggleStatus(RssImport $rssImport): RedirectResponse
     {
         $news = $rssImport->news;
@@ -193,30 +162,40 @@ class RssFeedController extends Controller
             return redirect()->back()->withErrors(['این مورد قبلاً منتشر شده و قابل انتشار مجدد نیست.']);
         }
 
-        if (! $rssImport->title || ! $rssImport->title_en || ! $rssImport->body) {
-            (new AiTranslateNewsJob($rssImport))->handle(app(AiService::class));
-            $rssImport->refresh();
+        $image = $this->copyImage($rssImport);
 
-            if (! $rssImport->title || ! $rssImport->title_en || ! $rssImport->body) {
-                return redirect()->back()->withErrors(['ترجمهٔ هوش مصنوعی ناموفق بود؛ دوباره تلاش کنید.']);
+        // Copy whatever is already available on the import row (raw text, or
+        // translated fields from previously translated rows). Items are created
+        // as DRAFTS — translation + SEO is done afterwards on the edit page.
+        $title = $rssImport->title ?: $rssImport->raw_title;
+        $body = $rssImport->body ?: $rssImport->raw_body;
+
+        // When the stored body is only a short snippet (no content:encoded in
+        // the feed), fetch the full article text from the source page now so
+        // the created item is complete before translating/publishing.
+        if (mb_strlen($body) < 600 && $rssImport->source_url) {
+            $fetched = app(ArticleBodyExtractor::class)->extract($rssImport->source_url);
+
+            if ($fetched !== null && mb_strlen($fetched) > mb_strlen($body) && mb_strlen($fetched) >= 300) {
+                $body = mb_substr($fetched, 0, 12000);
             }
         }
 
-        $image = $this->copyImage($rssImport);
+        $summary = $rssImport->summary ?: ($body ? Str::limit($body, 250) : null);
 
         $translated = [
-            'title' => $rssImport->title,
+            'title' => $title,
             'title_ar' => $rssImport->title_ar,
             'title_en' => $rssImport->title_en,
-            'summary' => $rssImport->summary,
+            'summary' => $summary,
             'summary_ar' => $rssImport->summary_ar,
             'summary_en' => $rssImport->summary_en,
-            'body' => $rssImport->body,
+            'body' => $body,
             'body_ar' => $rssImport->body_ar,
             'body_en' => $rssImport->body_en,
         ];
 
-        $publishedAt = now();
+        $now = now();
 
         $labels = [
             'news' => 'اخبار',
@@ -231,42 +210,38 @@ class RssFeedController extends Controller
             $created = match ($type) {
                 'news' => News::create($translated + [
                     'image' => $image,
-                    'slug' => $this->uniqueSlug('news', $rssImport->title),
+                    'slug' => $this->uniqueSlug('news', $title),
                     'source_url' => $rssImport->source_url,
                     'source_url_hash' => $rssImport->source_url_hash,
-                    'status' => 'published',
-                    'published_at' => $publishedAt,
+                    'status' => 'draft',
                 ]),
                 'message' => Message::create($translated + [
                     'image' => $image,
-                    'slug' => $this->uniqueSlug('messages', $rssImport->title),
+                    'slug' => $this->uniqueSlug('messages', $title),
                     'type' => 'message',
-                    'status' => 'published',
-                    'published_at' => $publishedAt,
+                    'status' => 'draft',
                 ]),
                 'article' => Article::create($translated + [
                     'image' => $image,
-                    'slug' => $this->uniqueSlug('articles', $rssImport->title),
-                    'status' => 'published',
-                    'published_at' => $publishedAt,
+                    'slug' => $this->uniqueSlug('articles', $title),
+                    'status' => 'draft',
                 ]),
                 'interview' => Interview::create($translated + [
                     'image' => $image,
-                    'slug' => $this->uniqueSlug('interviews', $rssImport->title),
-                    'status' => 'published',
-                    'published_at' => $publishedAt,
+                    'slug' => $this->uniqueSlug('interviews', $title),
+                    'status' => 'draft',
                 ]),
                 'quote' => Quote::create([
-                    'body' => $rssImport->body ?: ($rssImport->summary ?: $rssImport->title),
+                    'body' => $rssImport->body ?: ($rssImport->summary ?: $rssImport->raw_title),
                     'source' => $rssImport->feed?->name,
-                    'date' => $publishedAt->toDateString(),
+                    'date' => $now->toDateString(),
                     'image' => $image,
                 ]),
                 'gallery' => Gallery::create([
-                    'title' => $rssImport->title,
+                    'title' => $rssImport->title ?: $rssImport->raw_title,
                     'image' => $image,
-                    'description' => $rssImport->summary,
-                    'status' => 'published',
+                    'description' => $rssImport->summary ?: $rssImport->raw_body,
+                    'status' => 'draft',
                 ]),
             };
         } catch (\Throwable $e) {
@@ -274,7 +249,7 @@ class RssFeedController extends Controller
                 Storage::disk('public')->delete($image);
             }
 
-            return redirect()->back()->withErrors(['انتشار ناموفق بود: '.$e->getMessage()]);
+            return redirect()->back()->withErrors(['ثبت ناموفق بود: '.$e->getMessage()]);
         }
 
         $rssImport->update([
@@ -282,7 +257,10 @@ class RssFeedController extends Controller
             'news_id' => $type === 'news' ? $created->id : $rssImport->news_id,
         ]);
 
-        return redirect()->back()->with('success', 'با موفقیت در «'.$labels[$type].'» منتشر شد.');
+        $label = in_array($type, ['quote']) ? 'نقل‌قول' : ($labels[$type] ?? $type);
+        $published = $type === 'quote' ? 'ایجاد شد' : 'به‌صورت پیش‌نویس ثبت شد';
+
+        return redirect()->back()->with('success', 'با موفقیت در «'.$label.'» '.$published.'؛ برای ترجمه و انتشار آن را ویرایش کنید.');
     }
 
     private function copyImage(RssImport $rssImport): ?string

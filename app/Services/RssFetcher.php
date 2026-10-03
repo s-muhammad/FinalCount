@@ -48,6 +48,7 @@ class RssFetcher
                 'title' => $title,
                 'link' => $link,
                 'description' => $this->cleanDescription((string) ($item->description ?? '')),
+                'full_body' => $this->extractFullBody($item),
                 'pub_date' => $this->parseDate((string) ($item->pubDate ?? '')),
                 'image' => $this->extractImage($item),
             ];
@@ -69,6 +70,58 @@ class RssFetcher
         }
 
         return Str::limit(preg_replace('/\s+/u', ' ', $text), 500);
+    }
+
+    private function extractFullBody(SimpleXMLElement $item): string
+    {
+        $namespaces = $item->getNamespaces(true);
+
+        if (! isset($namespaces['content'])) {
+            return '';
+        }
+
+        $content = $item->children($namespaces['content']);
+        $html = trim((string) ($content->encoded ?? ''));
+
+        if ($html === '') {
+            return '';
+        }
+
+        $text = $this->htmlToParagraphs($html);
+
+        // Too short to be a real article — treat as absent so we fall back
+        // to the description snippet (and later to fetching the article page).
+        if (mb_strlen($text) < 300) {
+            return '';
+        }
+
+        return $text;
+    }
+
+    public function htmlToParagraphs(string $html): string
+    {
+        $text = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Turn block-level closers into paragraph breaks before stripping tags.
+        $text = preg_replace('/<\s*br\s*\/?\s*>/i', "\n", $text);
+        $text = preg_replace('/<\s*\/(p|div|li|h[1-6]|blockquote|tr|section|article)\s*>/i', "\n\n", $text);
+
+        $text = strip_tags($text);
+
+        $lines = preg_split('/\R/u', $text);
+        $cleaned = [];
+
+        foreach ($lines as $line) {
+            $line = trim(preg_replace('/[ \t\x{00A0}]+/u', ' ', $line));
+
+            if ($line !== '') {
+                $cleaned[] = $line;
+            }
+        }
+
+        $text = implode("\n\n", $cleaned);
+
+        return trim(preg_replace('/\n{3,}/', "\n\n", $text));
     }
 
     private function parseDate(string $value): ?\DateTimeImmutable

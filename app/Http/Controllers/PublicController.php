@@ -32,7 +32,7 @@ class PublicController extends Controller
             ? News::where('status', 'published')->where('is_featured', true)->latest()->first()
             : null;
         $latestMessages = $this->isModuleActive('messages')
-            ? Message::where('status', 'published')->latest()->take(3)->get()
+            ? Message::where('status', 'published')->latest()->take(5)->get()
             : collect();
         $latestSpeech = null;
         if ($this->isModuleActive('messages')) {
